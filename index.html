@@ -611,7 +611,7 @@ a{color:inherit;text-decoration:none}
 /* 骑手扫码落地页 */
 .login__invite{margin-top:10px;background:none;border:1px dashed rgba(45,212,191,.45);color:#7DF0E4;font-size:12px;padding:9px 16px;border-radius:999px;cursor:pointer;transition:.15s;width:100%}
 .login__invite:hover{background:rgba(45,212,191,.1)}
-.inv-card{position:relative;max-width:430px}
+.inv-card{position:relative;max-width:430px;padding-top:max(28px,env(safe-area-inset-top))}
 .inv-x{position:absolute;top:14px;right:16px;background:none;border:none;color:#8FA6C8;font-size:20px;line-height:1;cursor:pointer;z-index:2}
 .inv-x:hover{color:#E8F0FB}
 .iv-tip{font-size:12px;color:#9FB6DA;background:rgba(45,212,191,.08);border:1px solid rgba(45,212,191,.3);border-radius:10px;padding:10px 12px;line-height:1.7;margin:2px 0 10px}
@@ -627,6 +627,33 @@ a{color:inherit;text-decoration:none}
 .iv-chip span{display:inline-block;font-size:12px;color:#9FB6DA;background:#0C1424;border:1px solid #22304F;border-radius:999px;padding:5px 12px;transition:.15s}
 .iv-chip input:checked+span{background:rgba(45,212,191,.14);border-color:rgba(45,212,191,.6);color:#7DF0E4}
 .iv-form .login__demo{margin-top:6px}
+.iv-rhint{font-size:10px;color:#5F769A;font-weight:400}
+.iv-region{display:flex;gap:8px}
+.iv-rval{flex:1;min-width:0;background:#0B1426;border:1px solid #22304F;border-radius:9px;color:#9FB6DA;padding:9px 11px;font-size:12px;line-height:1.5;display:flex;align-items:center}
+.iv-rval[data-ok="1"]{color:#7DF0E4;border-color:rgba(45,212,191,.45)}
+.iv-rbtn{display:inline-flex;align-items:center;gap:5px;background:#0C1424;border:1px solid #22304F;color:#7DF0E4;border-radius:9px;padding:8px 12px;font-size:12px;cursor:pointer;white-space:nowrap}
+.iv-rbtn:hover{border-color:#2DD4BF}
+.iv-rmap{background:#0C1424;border:1px solid #22304F;border-radius:10px;padding:9px;margin-top:2px}
+.iv-rmap-tip{font-size:11px;color:#8FA6C8;line-height:1.6;margin-bottom:8px}
+.iv-rmap-tip b{color:#7DF0E4}
+.iv-rmap-box{height:250px;border-radius:9px;position:relative;z-index:1}
+.iv-rmap-box .leaflet-container{background:#0C1424}
+.iv-rmap-ops{display:flex;gap:8px;margin-top:9px;justify-content:flex-end}
+.m-badge{display:none;min-width:16px;height:16px;line-height:16px;padding:0 5px;border-radius:9px;background:#F0565B;color:#fff;font-size:10px;font-weight:700;text-align:center;margin-left:3px}
+.m-bell{display:inline-flex;align-items:center;gap:4px;background:#0F1930;border:1px solid #1E2B48;color:#F0565B;border-radius:9px;padding:5px 9px;font-size:12px;cursor:pointer}
+.m-bell:hover{border-color:#F0565B}
+.m-belln{display:none;min-width:16px;height:16px;line-height:16px;padding:0 5px;border-radius:9px;background:#F0565B;color:#fff;font-size:10px;font-weight:700;text-align:center}
+.iv-myrec{margin:8px 0;background:#0B1426;border:1px solid #22304F;border-radius:10px;padding:10px 12px;font-size:12px;color:#9FB6DA;text-align:left;line-height:1.8}
+.iv-query{width:100%}
+.iv-query h3{color:#fff;font-size:15px;margin:4px 0 12px}
+.iv-qempty{color:#8FA6C8;font-size:12px;text-align:center;padding:14px 0}
+.iv-qrow{background:#0B1426;border:1px solid #22304F;border-radius:9px;padding:9px 11px;margin-bottom:8px;font-size:13px;color:#D6E2F5;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.iv-qsub{width:100%;font-size:11px;color:#8FA6C8}
+.st-badge{padding:2px 9px;border-radius:8px;font-size:11px;font-weight:700;margin-left:auto}
+.st-badge.ok{background:rgba(52,199,89,.15);color:#34C759;border:1px solid rgba(52,199,89,.35)}
+.st-badge.no{background:rgba(240,86,91,.15);color:#F0565B;border:1px solid rgba(240,86,91,.35)}
+.st-badge.wait{background:rgba(250,173,20,.15);color:#F5A623;border:1px solid rgba(250,173,20,.35)}
+.iv-ghost{background:transparent;border:1px solid #22304F;color:#8CA3C3;border-radius:9px;padding:9px;font-size:13px;cursor:pointer;width:100%;margin-top:8px}
 .iv-ok{display:flex;flex-direction:column;align-items:center;gap:10px;text-align:center;padding:22px 8px}
 .iv-okic{width:54px;height:54px;border-radius:50%;background:rgba(45,212,191,.16);border:1px solid rgba(45,212,191,.6);color:#7DF0E4;font-size:26px;display:grid;place-items:center}
 .iv-ok b{font-size:16px;color:#E8F0FB}
@@ -914,12 +941,18 @@ a{color:inherit;text-decoration:none}
       <p>时段自由 · 按单结算</p>
     </div>
     <div class="iv-tag">平台内部邀约 · 信息提交后推送至运营管理后台</div>
-    <div class="iv-tip">用空闲时段为无人车到站卸货增收：单次卸货约 10-30 分钟，按单计酬，审核通过后短信通知上岗。欢迎换电柜骑手、门店员工、社会零工等各类人员加入。</div>
     <form class="iv-form" id="invForm">
       <div class="iv-row"><label>姓名 *</label><input id="ivName" placeholder="如 王磊"></div>
       <div class="iv-row"><label>手机号 *</label><input id="ivPhone" maxlength="11" placeholder="11 位手机号，用于结算与上岗通知"></div>
-      <div class="iv-row"><label>人员来源</label><select id="ivPlat"><option>换电柜骑手</option><option>门店员工</option><option>社会零工</option><option>其他</option></select></div>
-      <div class="iv-row"><label>常驻区域</label><select id="ivRegion"><option>观山湖区</option><option>云岩区</option><option>南明区</option><option>花溪区</option><option>白云区</option><option>乌当区</option><option>清镇市</option><option>开阳县</option><option>息烽县</option><option>修文县</option></select></div>
+      <div class="iv-row"><label>人员来源</label><select id="ivPlat"><option>外卖骑手</option><option>门店员工</option><option>社会零工</option><option>其他</option></select></div>
+      <div class="iv-row"><label>常驻区域 * <span class="iv-rhint">（以点选为中心 · 方圆 3 公里作业）</span></label>
+        <div class="iv-region"><div class="iv-rval" id="ivRegionVal" data-ok="0">尚未选择，点击右侧「地图选点」</div><button type="button" class="iv-rbtn" id="ivRegionOpen"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 1 1 16 0z"/><circle cx="12" cy="10" r="3"/></svg> 地图选点</button></div>
+        <div class="iv-rmap" id="ivRegionMapWrap" style="display:none">
+          <div class="iv-rmap-tip">拖动 / 缩放地图，<b>长按</b>约 0.6 秒落定中心点（蓝圈 = 方圆 3 公里），或点「用我的位置」自动定位。</div>
+          <div class="iv-rmap-box" id="ivRegionMap"></div>
+          <div class="iv-rmap-ops"><button type="button" class="iv-rbtn" id="ivRegionLocate">用我的位置</button><button type="button" class="iv-rbtn" id="ivRegionOk">确认该区域</button></div>
+        </div>
+      </div>
       <div class="iv-row"><label>可作业时段 *</label><div class="iv-chips">
         <label class="iv-chip"><input type="checkbox" name="shift" value="06-10 早高峰"><span>06-10 早高峰</span></label>
         <label class="iv-chip"><input type="checkbox" name="shift" value="10-14"><span>10-14</span></label>
@@ -939,8 +972,17 @@ a{color:inherit;text-decoration:none}
     <div class="iv-ok" id="invOk" style="display:none">
       <div class="iv-okic">✓</div>
       <b>登记已提交</b>
-      <p>您的信息已推送至平台<b>运营管理后台</b>，运营审核通过后将以短信通知上岗；首次上岗需完成卸货 SOP 培训（约 20 分钟）。</p>
-      <button class="login__demo" id="ivBack">完成</button>
+      <div class="iv-myrec" id="ivMyRec"></div>
+      <p>已推送至平台<b>运营管理后台</b>，当前状态「<b>待审核</b>」；审核通过后将以短信通知上岗（正式运营时），期间可随时查询审核进度。</p>
+      <button class="login__demo" id="ivQueryBtn">查审核结果</button>
+      <button class="iv-ghost" id="ivBack">完成</button>
+    </div>
+    <div class="iv-query" id="ivQuery" style="display:none">
+      <h3>查审核结果</h3>
+      <div class="iv-row"><label>报名手机号 *</label><input id="ivQPhone" maxlength="11" placeholder="提交登记时填写的 11 位手机号"></div>
+      <button class="login__demo" id="ivQGo">查询</button>
+      <div id="ivQRes"></div>
+      <button class="iv-ghost" id="ivQBack">返回</button>
     </div>
   </div>
 </div>
@@ -1070,10 +1112,10 @@ let STAFF = [
   {id:'P10', name:'莫师傅', role:'片区驻点', station:'片区驻点池', score:4.5, ok:90, state:'备选', source:'自有员工'}
 ];
 
-/* ---- 换电柜骑手邀约：转化通道（扫码登记 → 待审核 → 通过后纳入人员池）---- */
+/* ---- 卸货员邀约：转化通道（扫码登记 → 待审核 → 通过后纳入人员池）---- */
 let INVITE_STAT = {views:32, scan:21, submit:16, pass:11};
 let INVITES = [
-  {id:'I01', name:'王磊', phone:'139****2214', platform:'换电柜骑手', grid:'观山湖万达换电柜', region:'观山湖区', shift:'06-10 早高峰 · 18-22 晚高峰', skills:['电动车快运','生鲜冷链'], time:'今天 09:12', state:'待审核'},
+  {id:'I01', name:'王磊', phone:'139****2214', platform:'外卖骑手', grid:'观山湖万达换电柜', region:'观山湖区', shift:'06-10 早高峰 · 18-22 晚高峰', skills:['电动车快运','生鲜冷链'], time:'今天 09:12', state:'待审核'},
   {id:'I02', name:'张斌', phone:'151****8867', platform:'门店员工', grid:'会展城店', region:'观山湖区', shift:'10-14 · 18-22', skills:['电动车快运'], time:'今天 10:47', state:'待审核'},
   {id:'I03', name:'刘洋', phone:'186****3352', platform:'社会零工', grid:'', region:'云岩区', shift:'全天', skills:['电动车快运','重货协同'], time:'昨天 20:15', state:'待审核'}
 ];
@@ -1086,14 +1128,25 @@ const SUPA_URL='https://bwlzvnpvaptmsmwkbxjs.supabase.co';
 const SUPA_KEY='sb_publishable_zFClW1QN8-RVzXEw-JUU0A_TrWZPuTC';
 const SUPA_ON=!!(SUPA_URL&&SUPA_KEY);
 let REMOTE_INVITES=[];
+let remoteLoading=false;
 function supaHeaders(){
   return {'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY,'Content-Type':'application/json'};
 }
 function refreshRemoteInvites(){
-  if(!SUPA_ON) return;
-  const q=SUPA_URL+'/rest/v1/invites?select=id,invite_code,name,phone,platform,grid,region,shift,skills,pay,state,created_at&state=eq.'+encodeURIComponent('待审核')+'&order=created_at.desc';
+  if(!SUPA_ON||remoteLoading) return;
+  remoteLoading=true;
+  const q=SUPA_URL+'/rest/v1/invites?select=id,invite_code,name,phone,platform,grid,region,region_lat,region_lng,shift,skills,pay,state,created_at&state=eq.'+encodeURIComponent('待审核')+'&order=created_at.desc';
   fetch(q,{headers:supaHeaders()})
-    .then(r=>r.json()).then(list=>{ if(Array.isArray(list)){ REMOTE_INVITES=list; if(state.ver==='m'&&state.mNav==='staff') renderM(); } }).catch(()=>{});
+    .then(r=>r.json()).then(list=>{
+      remoteLoading=false;
+      if(Array.isArray(list)){
+        const sig=a=>a.map(x=>x.id+':'+x.state).join(',');
+        const changed=sig(list)!==sig(REMOTE_INVITES);
+        REMOTE_INVITES=list;
+        if(changed&&state.ver==='m'&&state.mNav==='staff') renderM();
+        updateMBell();
+      }
+    }).catch(()=>{remoteLoading=false;});
 }
 function maskPhone(p){ if(!p) return ''; return String(p).replace(/(\d{3})\d{4}(\d{4})/,'$1****$2'); }
 
@@ -1106,7 +1159,7 @@ const state = {
 let seq = 100;
 
 /* 版本号：每轮迭代更新此常量，顶栏徽标与登录页自动同步 */
-const APP_VERSION = 'V13';
+const APP_VERSION = 'V17';
 /* 当日班次即时确认限时（分钟），超时自动升级备选 / 外溢 */
 const URGENT_CONFIRM_MIN = 30;
 
@@ -2078,7 +2131,7 @@ function renderM(){
   const host=$('#verM');
   const tab=state.mNav||'map';
   const navItems=[['map','地图总览',ICONS.grid],['vehicle','车辆管理',ICONS.truck],['route','线路管理',ICONS.route],['staff','人员管理',ICONS.user],['report','数据报表',ICONS.doc]];
-  const nav=navItems.map(n=>'<button class="vm-nav '+(tab===n[0]?'is-active':'')+'" data-mnav="'+n[0]+'">'+n[2]+n[1]+'</button>').join('');
+  const nav=navItems.map(n=>'<button class="vm-nav '+(tab===n[0]?'is-active':'')+'" data-mnav="'+n[0]+'">'+n[2]+n[1]+((n[0]==='staff')?'<span class="m-badge" id="mNavBadge"></span>':'')+'</button>').join('');
   const stopCount=ROUTES.reduce((n,r)=>n+r.stops.length,0);
   const vehCount=Object.keys(VEHICLES).length;
 
@@ -2094,7 +2147,7 @@ function renderM(){
     +'平台配置视角 · 车辆 / 线路 / 人员 / 站点增删改查，地图总览一屏掌控'
     +'<span class="bn-actions"><button class="bn-btn" id="mReset">恢复示例数据</button></span></div>'
     +'<div class="vm-top"><nav class="vm-navs">'+nav+'</nav>'
-    +'<div class="vm-meta"><span>'+ROUTES.length+' 条线路</span><span>'+stopCount+' 个站点</span><span>'+vehCount+' 台车辆</span><span>'+STAFF.length+' 名责任人</span>'
+    +'<div class="vm-meta"><button class="m-bell" id="mBell" title="待审核提醒（点击前往人员管理）"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg><b class="m-belln" id="mBellN" style="display:none">0</b></button><span>'+ROUTES.length+' 条线路</span><span>'+stopCount+' 个站点</span><span>'+vehCount+' 台车辆</span><span>'+STAFF.length+' 名责任人</span>'
     +ROUTES.map(r=>'<span><i class="vm-mdot" style="background:'+MLINE_COLORS[r.id]+'"></i>'+esc(r.name)+' '+r.stops.length+' 站</span>').join('')
     +'<span><i class="vm-mdot" style="background:#8CA3C3"></i>分拣仓</span></div></div>'
     +'<div class="vm-body">'+body+'</div>';
@@ -2102,6 +2155,8 @@ function renderM(){
   host.querySelectorAll('[data-mnav]').forEach(el=>el.addEventListener('click',()=>{ state.mNav=el.dataset.mnav; renderM(); }));
   host.querySelectorAll('[data-rtoggle]').forEach(el=>el.addEventListener('click',e=>{ if(e.target.closest('[data-mact]')) return; el.closest('.vm-route-card').classList.toggle('is-open'); }));
   $('#mReset').addEventListener('click',resetDemoData);
+  const mb=document.getElementById('mBell'); if(mb) mb.addEventListener('click',()=>{ state.mNav='staff'; renderM(); });
+  updateMBell();
   bindM();
   persist();
 }
@@ -2160,7 +2215,7 @@ function mStaffHtml(){
   const remoteOk=REMOTE_INVITES.filter(x=>x.state==='待审核');
   const localApps=apps.filter(a=>a.state==='待审核').filter(a=>!remoteOk.some(x=>x.name===a.name&&x.phone===a.phone));
   const pending=INVITES.concat(localApps.map(a=>({id:a.id, name:a.name, phone:a.phone, platform:a.platform, grid:a.grid||'', region:a.region||'', shift:a.shift||'', skills:a.skills||[], time:a.time, state:'待审核', _app:true})))
-    .concat(remoteOk.map(x=>({id:'R'+x.id, _remote:true, remoteId:x.id, name:x.name, phone:x.phone, platform:x.platform, grid:x.grid||'', region:x.region||'', shift:x.shift||'', skills:(x.skills||'').split('、').filter(Boolean), time:(x.created_at||'').replace('T',' ').slice(5,16), state:'待审核'})));
+    .concat(remoteOk.map(x=>({id:'R'+x.id, _remote:true, remoteId:x.id, name:x.name, phone:x.phone, platform:x.platform, grid:x.grid||'', region:x.region||'', regionLat:x.region_lat||x.regionLat||0, shift:x.shift||'', skills:(x.skills||'').split('、').filter(Boolean), time:(x.created_at||'').replace('T',' ').slice(5,16), state:'待审核'})));
   const selfCnt=STAFF.filter(p=>p.source!=='骑手转化').length;
   const swapCnt=STAFF.filter(p=>p.source==='骑手转化'||p.source==='邀约招募').length;
   const f=state.mStaffFilter||'all';
@@ -2175,11 +2230,11 @@ function mStaffHtml(){
   const pendRows=pending.map(a=>{
     return '<div class="inv-pend"><div class="ip-top"><b>'+esc(a.name)+'</b><span class="t-muted">'+esc(maskPhone(a.phone))+'</span>'
       +'<span class="ip-grid">'+ICONS.bolt+' '+esc(a.platform||a.grid||a.region||'')+'</span><span class="ip-time">'+esc(a.time)+'</span></div>'
-      +'<div class="ip-mid">常驻 '+esc(a.region||'')+(a.shift?' · 时段 '+esc(a.shift):'')+(a.grid?' · '+esc(a.grid):'')+'</div>'
+      +'<div class="ip-mid">常驻 '+esc(a.region||'')+(a.regionLat?' · 方圆3km':'')+(a.shift?' · 时段 '+esc(a.shift):'')+(a.grid?' · '+esc(a.grid):'')+'</div>'
       +'<div class="ip-skills">'+(a.skills||[]).map(s=>'<i>'+esc(s)+'</i>').join('')+'</div>'
       +'<div class="ip-ops"><button class="vm-btn primary" data-mact="approveInvite" data-id="'+a.id+'">'+ICONS.check+' 通过并纳入人员池</button><button class="vm-btn danger" data-mact="rejectInvite" data-id="'+a.id+'">拒绝</button></div></div>';
   }).join('');
-  return '<div class="vm-card"><div class="vm-card-head"><h3>'+ICONS.user+' 人员管理 <span class="vm-hint">责任人 = 可绑定停靠点主责/备选 · 骑手转化：换电柜骑手扫码登记入库</span></h3>'
+  return '<div class="vm-card"><div class="vm-card-head"><h3>'+ICONS.user+' 人员管理 <span class="vm-hint">责任人 = 可绑定停靠点主责/备选 · 邀约招募：外卖骑手/门店员工/零工扫码登记入库</span></h3>'
     +'<button class="vm-btn primary" data-mact="inviteStaff">'+ICONS.plus+' 发起骑手邀约</button></div>'
     +'<div class="inv-kpis">'
     +'<div class="inv-kpi"><b>'+STAFF.length+'</b><span>在职人员</span></div>'
@@ -2492,7 +2547,7 @@ function approveInvite(id){
   if(!a){ toast('未找到该申请'); return; }
   INVITES=INVITES.filter(x=>x.id!==id);
   if(a._app) saveInviteApps(apps.filter(x=>x.id!==id));
-  STAFF.push({id:'P'+String(STAFF.length+1).padStart(2,'0'), name:a.name, phone:a.phone, role:'兼职·骑手', station:'片区驻点池', score:4.0, ok:90, state:'待培训', source:(a.platform==='换电柜骑手'?'骑手转化':'邀约招募'), grid:a.grid||'', region:a.region||'', skills:a.skills||[]});
+  STAFF.push({id:'P'+String(STAFF.length+1).padStart(2,'0'), name:a.name, phone:a.phone, role:'兼职·骑手', station:'片区驻点池', score:4.0, ok:90, state:'待培训', source:(a.platform==='外卖骑手'?'骑手转化':'邀约招募'), grid:a.grid||'', region:a.region||'', skills:a.skills||[]});
   INVITE_STAT.pass++;
   closeModal(); renderM(); toast('已通过：'+a.name+' 纳入人员池（待培训）');
 }
@@ -2517,7 +2572,7 @@ function openStaffForm(id){
     +fRow('姓名','<input required id="mfPName" value="'+(p?p.name:'')+'" placeholder="如 张师傅">')
     +fRow('角色','<select id="mfPRole"><option'+(p&&p.role==='门店收货员'?' selected':'')+'>门店收货员</option><option'+(p&&p.role==='门店员工'?' selected':'')+'>门店员工</option><option'+(p&&p.role==='片区驻点'?' selected':'')+'>片区驻点</option><option'+(p&&p.role==='兼职'?' selected':'')+'>兼职</option><option'+(p&&p.role==='兼职·骑手'?' selected':'')+'>兼职·骑手</option></select>')
     +fRow('绑定站点','<input id="mfPStation" value="'+(p?p.station:'')+'" placeholder="如 观山湖万达店 / 片区驻点池">')
-    +((p&&p.source==='骑手转化')?'<div class="vm-hint">'+ICONS.hand+' 该人员由换电柜骑手扫码转化而来</div>':'')
+    +((p&&p.source==='骑手转化')?'<div class="vm-hint">'+ICONS.hand+' 该人员由外卖骑手扫码转化而来</div>':'')
     +fRow('信用分','<input type="number" id="mfPScore" min="0" max="5" step="0.1" value="'+(p?p.score:4.5)+'">')
     +fRow('履约率 %','<input type="number" id="mfPOk" min="0" max="100" value="'+(p?p.ok:90)+'">')
     +fRow('状态','<select id="mfPState"><option'+(p&&p.state==='在岗'?' selected':'')+'>在岗</option><option'+(p&&p.state==='待确认'?' selected':'')+'>待确认</option><option'+(p&&p.state==='备选'?' selected':'')+'>备选</option><option'+(p&&p.state==='待培训'?' selected':'')+'>待培训</option><option'+(p&&p.state==='停用'?' selected':'')+'>停用</option></select>')
@@ -2798,6 +2853,104 @@ function renderCurrent(){
 }
 
 /* ---------- 骑手邀约落地页 ---------- */
+let rgn={lat:null,lng:null,name:''};
+let ivRMap=null, ivRMk=null, ivRCir=null, ivRCenter=null, ivRName='';
+function regeoName(lat,lng,cb){
+  const key='8a6e3e74dceb54210912deb7081c2a7d';
+  const fn='__rgeoCB'+Date.now();
+  const url='https://restapi.amap.com/v3/geocode/regeo?location='+lng+','+lat+'&key='+key+'&output=json&radius=1000&extensions=base&callback='+fn;
+  const s=document.createElement('script');
+  window[fn]=d=>{ try{ delete window[fn]; }catch(e){} if(s.parentNode) s.parentNode.removeChild(s); cb(d&&d.regeocode?d.regeocode.formatted_address:null); };
+  s.onerror=()=>{ try{ delete window[fn]; }catch(e){} if(s.parentNode) s.parentNode.removeChild(s); cb(null); };
+  s.src=url; document.head.appendChild(s);
+}
+function initRegionMap(){
+  const box=$('#ivRegionMap'); if(!box) return;
+  const wrap=$('#ivRegionMapWrap'); if(wrap) wrap.style.display='block';
+  const start=(ivRCenter||[26.60,106.66]);
+  const mk=()=>{
+    if(typeof L==='undefined'){ box.innerHTML='<div class="vm-map-fail">地图组件加载失败，请稍后重试</div>'; return; }
+    if(ivRMap){ ivRMap.invalidateSize(); return; }
+    ivRMap=L.map('ivRegionMap',{zoomControl:true}).setView(start,13);
+    addTileLayer(ivRMap);
+    const draw=(ll)=>{
+      ivRCenter=[ll[0],ll[1]];
+      if(ivRMk) ivRMap.removeLayer(ivRMk);
+      if(ivRCir) ivRMap.removeLayer(ivRCir);
+      ivRMk=L.marker([ll[0],ll[1]]).addTo(ivRMap);
+      ivRCir=L.circle([ll[0],ll[1]],{radius:3000,color:'#4F8BFF',weight:2,fillColor:'#4F8BFF',fillOpacity:.1}).addTo(ivRMap);
+      regeoName(ll[0],ll[1],n=>{ ivRName=n||''; const v=$('#ivRegionVal'); if(v) v.textContent=(n||('坐标 '+ll[0].toFixed(4)+', '+ll[1].toFixed(4)))+' · 方圆3公里'; });
+    };
+    let timer=null;
+    const clearT=()=>{ if(timer){ clearTimeout(timer); timer=null; } };
+    ivRMap.on('mousedown',e=>{ clearT(); timer=setTimeout(()=>{ timer=null; draw([e.latlng.lat,e.latlng.lng]); toast('已落定中心点，可确认或继续调整'); },600); });
+    ivRMap.on('mousemove',clearT); ivRMap.on('mouseup',clearT);
+    ivRMap.on('dragstart',clearT); ivRMap.on('zoomstart',clearT);
+    ivRMap.on('touchstart',e=>{ clearT(); timer=setTimeout(()=>{ timer=null; const ll=ivRMap.mouseEventToLatLng(e.originalEvent); if(ll) draw([ll.lat,ll.lng]); },600); });
+    ivRMap.on('touchmove',clearT); ivRMap.on('touchend',clearT);
+    if(ivRCenter) draw(ivRCenter);
+    setTimeout(()=>{ ivRMap.invalidateSize(); },80);
+  };
+  if(typeof L==='undefined') loadLeaflet(mk); else mk();
+}
+function locateMeRegion(){
+  if(!navigator.geolocation){ toast('当前环境不支持定位，请手动长按选点'); return; }
+  navigator.geolocation.getCurrentPosition(pos=>{
+    const lat=pos.coords.latitude, lng=pos.coords.longitude;
+    initRegionMap();
+    setTimeout(()=>{ if(!ivRMap){ toast('地图未就绪，请稍后再试'); return; }
+      ivRMap.setView([lat,lng],14);
+      setTimeout(()=>{
+        ivRCenter=[lat,lng];
+        if(ivRMk) ivRMap.removeLayer(ivRMk);
+        if(ivRCir) ivRMap.removeLayer(ivRCir);
+        ivRMk=L.marker([lat,lng]).addTo(ivRMap);
+        ivRCir=L.circle([lat,lng],{radius:3000,color:'#4F8BFF',weight:2,fillColor:'#4F8BFF',fillOpacity:.1}).addTo(ivRMap);
+        regeoName(lat,lng,n=>{ ivRName=n||''; const v=$('#ivRegionVal'); if(v) v.textContent=(n||('坐标 '+lat.toFixed(4)+', '+lng.toFixed(4)))+' · 方圆3公里'; });
+      },120);
+    },120);
+  },()=>{ toast('定位失败，请手动长按选点'); },{timeout:6000});
+}
+function stateBadge(s){
+  if(s==='已通过') return '<span class="st-badge ok">已通过</span>';
+  if(s==='已拒绝') return '<span class="st-badge no">已拒绝</span>';
+  return '<span class="st-badge wait">待审核</span>';
+}
+function pendingCount(){
+  let n=0;
+  (INVITES||[]).forEach(i=>{ if(i.state==='待审核') n++; });
+  try{ loadInviteApps().forEach(a=>{ if(a.state==='待审核') n++; }); }catch(e){}
+  (REMOTE_INVITES||[]).forEach(r=>{ if(r.state==='待审核') n++; });
+  return n;
+}
+function updateMBell(){
+  const n=pendingCount();
+  const b=document.getElementById('mBellN');
+  if(b){ b.textContent=n>99?'99+':n; b.style.display=n>0?'inline-block':'none'; }
+  const nb=document.getElementById('mNavBadge');
+  if(nb){ nb.textContent=n>99?'99+':n; nb.style.display=n>0?'inline-block':'none'; }
+}
+function queryInvite(){
+  const phone=$('#ivQPhone').value.trim();
+  if(!/^1\d{10}$/.test(phone)){ toast('请输入正确的 11 位手机号'); return; }
+  const finish=rows=>{
+    const seen={}, out=[];
+    rows.forEach(x=>{ const k=(x.name||'')+'|'+x.phone; if(!seen[k]){ seen[k]=1; out.push(x); } });
+    const box=$('#ivQRes');
+    if(!out.length){ box.innerHTML='<div class="iv-qempty">未找到该手机号的报名记录</div>'; return; }
+    box.innerHTML=out.map(x=>'<div class="iv-qrow"><b>'+esc(x.name)+'</b> '+esc(maskPhone(x.phone))+stateBadge(x.state)+'<div class="iv-qsub">常驻 '+esc(x.region||'未填写')+' · 提交于 '+esc(x.time||'')+'</div></div>').join('');
+  };
+  const local=()=>{ try{ return loadInviteApps().filter(a=>a.phone===phone).map(a=>({name:a.name,phone:a.phone,region:a.region||'',state:a.state||'待审核',time:a.time||''})); }catch(e){ return []; } };
+  if(SUPA_ON){
+    const q=SUPA_URL+'/rest/v1/invites?select=name,phone,region,state,created_at&phone=eq.'+encodeURIComponent(phone)+'&order=created_at.desc&limit=5';
+    fetch(q,{headers:supaHeaders()}).then(r=>r.json()).then(list=>{
+      const rows=[];
+      if(Array.isArray(list)) list.forEach(x=>rows.push({name:x.name,phone:x.phone,region:x.region||'',state:x.state||'待审核',time:(x.created_at||'').replace('T',' ').slice(5,16)}));
+      rows.push.apply(rows,local());
+      finish(rows);
+    }).catch(()=>{ const l=local(); finish(l); if(!l.length) $('#ivQRes').innerHTML='<div class="iv-qempty">查询失败（网络不可用），本机也无该手机号记录</div>'; });
+  } else { finish(local()); }
+}
 function showInviteScreen(){
   $('#loginScreen').style.display='none';
   $('#shell').style.display='none';
@@ -2805,6 +2958,7 @@ function showInviteScreen(){
   if(f) f.style.display='block';
   if(ok) ok.style.display='none';
   $('#inviteScreen').style.display='flex';
+  if(!rgn.lat){ const v=$('#ivRegionVal'); if(v){ v.textContent='尚未选择，点击右侧「地图选点」'; v.dataset.ok='0'; } }
 }
 function submitInvite(){
   const name=$('#ivName').value.trim(), phone=$('#ivPhone').value.trim();
@@ -2814,9 +2968,10 @@ function submitInvite(){
   if(!shifts.length){ toast('请至少选择 1 个可作业时段'); return; }
   const skills=[].slice.call(document.querySelectorAll('#invForm input[name=skill]:checked')).map(i=>i.value);
   const p=new URLSearchParams(location.search).get('invite')||'';
-  const rec={invite_code:p, name:name, phone:phone, platform:$('#ivPlat').value, grid:'', region:$('#ivRegion').value, shift:shifts.join(' · '), skills:skills.join('、'), pay:$('#ivPay').value, state:'待审核'};
+  if(!rgn.lat){ toast('请先选择常驻区域（方圆 3 公里）'); return; }
+  const rec={invite_code:p, name:name, phone:phone, platform:$('#ivPlat').value, grid:'', region:rgn.name, region_name:rgn.name, region_lat:rgn.lat, region_lng:rgn.lng, shift:shifts.join(' · '), skills:skills.join('、'), pay:$('#ivPay').value, state:'待审核'};
   const apps=loadInviteApps();
-  apps.unshift({id:'I'+Date.now().toString().slice(-6), invite_code:p, name:name, phone:phone, platform:rec.platform, grid:rec.grid, region:rec.region, shift:rec.shift, skills:skills, pay:rec.pay, time:nowTag(), state:'待审核', _app:true});
+  apps.unshift({id:'I'+Date.now().toString().slice(-6), invite_code:p, name:name, phone:phone, platform:rec.platform, grid:rec.grid, region:rec.region, regionLat:rgn.lat, regionLng:rgn.lng, shift:rec.shift, skills:skills, pay:rec.pay, time:nowTag(), state:'待审核', _app:true});
   saveInviteApps(apps);
   INVITE_STAT.submit++;
   if(SUPA_ON){
@@ -2825,6 +2980,10 @@ function submitInvite(){
       .catch(()=>{ toast('网络异常：已存本机，稍后自动重试'); });
   } else { toast('未配置云端，已存本机（演示）'); }
   $('#invForm').style.display='none';
+  const rec0=apps[0];
+  const mr=$('#ivMyRec');
+  if(mr) mr.innerHTML='<div><b>'+esc(rec0.name)+'</b> '+esc(maskPhone(rec0.phone))+'</div><div>常驻 '+esc(rec0.region||'未选择')+(rec0.regionLat?' · 方圆3km':'')+'</div><div>状态 '+stateBadge(rec0.state||'待审核')+'</div>';
+  const qr=$('#ivQuery'); if(qr) qr.style.display='none';
   $('#invOk').style.display='block';
 }
 /* ---------- 登录 / 角色进入 ---------- */
@@ -2858,6 +3017,19 @@ $('#btnInviteLogin').addEventListener('click',()=>{ showInviteScreen(); });
 $('#invX').addEventListener('click',()=>{ $('#inviteScreen').style.display='none'; $('#loginScreen').style.display='flex'; });
 $('#ivBack').addEventListener('click',()=>{ $('#inviteScreen').style.display='none'; $('#loginScreen').style.display='flex'; });
 $('#invForm').addEventListener('submit',e=>{ e.preventDefault(); submitInvite(); });
+$('#ivRegionOpen').addEventListener('click',()=>{ initRegionMap(); });
+$('#ivQueryBtn').addEventListener('click',()=>{ $('#invOk').style.display='none'; $('#ivQuery').style.display='block'; $('#ivQPhone').value=''; $('#ivQRes').innerHTML=''; });
+$('#ivQBack').addEventListener('click',()=>{ $('#ivQuery').style.display='none'; $('#invOk').style.display='block'; });
+$('#ivQGo').addEventListener('click',()=>{ queryInvite(); });
+$('#ivRegionLocate').addEventListener('click',()=>{ locateMeRegion(); });
+$('#ivRegionOk').addEventListener('click',()=>{
+  if(!ivRCenter){ toast('请先在地图上长按选点，或使用「用我的位置」定位'); return; }
+  rgn={lat:ivRCenter[0], lng:ivRCenter[1], name:ivRName||('坐标 '+ivRCenter[0].toFixed(4)+', '+ivRCenter[1].toFixed(4))};
+  const wrap=$('#ivRegionMapWrap'); if(wrap) wrap.style.display='none';
+  const v=$('#ivRegionVal'); if(v){ v.textContent=rgn.name+' · 方圆3公里'; v.dataset.ok='1'; }
+  toast('已选定常驻区域（方圆 3 公里）');
+});
+setInterval(()=>{ if(state.ver==='m'){ refreshRemoteInvites(); } },25000);
 (function(){
   const p=new URLSearchParams(location.search).get('invite');
   if(p){
