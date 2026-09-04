@@ -1,0 +1,2306 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>无人车卸货履约平台 · 深化版</title>
+<link rel="stylesheet" href="https://miaoda.feishu.cn/fonts/css2?family=Noto+Sans+SC:wght@300;400;500;700;900&family=JetBrains+Mono:wght@400;500;700&display=swap">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css">
+<script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js"></script>
+<style>
+/* ============================================================
+   无人车卸货履约平台 —— 深化版
+   A 调度舱（深色 · 平台运营视角）
+   B 企业工作台（浅色 · 货主视角）
+   C 履约现场（高对比 · 一线责任人视角）
+   ============================================================ */
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{height:100%}
+body{font-family:'Noto Sans SC','PingFang SC','Microsoft YaHei',system-ui,sans-serif;background:#0B1220;color:#E6EDF7;-webkit-font-smoothing:antialiased}
+button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit}
+.mono{font-family:'JetBrains Mono','SFMono-Regular',Consolas,'Courier New',monospace}
+a{color:inherit;text-decoration:none}
+
+/* ---------- 顶部版本切换器 ---------- */
+.shell{display:flex;flex-direction:column;height:100vh;min-width:1180px;overflow:hidden}
+.switcher{display:flex;align-items:center;gap:18px;padding:11px 22px;background:#0D1424;border-bottom:1px solid #1F2A44;flex:0 0 auto;z-index:30}
+.switcher__brand{display:flex;align-items:center;gap:12px}
+.switcher__logo{width:38px;height:38px;border-radius:10px;display:grid;place-items:center;background:linear-gradient(135deg,#17B8A6,#0E7C6E);color:#fff;flex:0 0 auto}
+.switcher__title{font-size:16px;font-weight:800;letter-spacing:.4px}
+.switcher__sub{font-size:11px;color:#8CA3C3;margin-top:2px;letter-spacing:.3px}
+.switcher__tabs{display:flex;gap:8px;margin-left:12px;flex:1 1 auto}
+.switcher__tab{padding:9px 16px;border-radius:9px;font-size:13px;font-weight:600;color:#8CA3C3;border:1px solid transparent;transition:.18s;display:flex;align-items:center;gap:7px}
+.switcher__tab .sw-dot{width:7px;height:7px;border-radius:50%;background:currentColor;opacity:.7}
+.switcher__tab:hover{color:#D6E2F5;background:#16203A}
+.switcher__tab.is-active{color:#0B1220;background:#2DD4BF;border-color:#2DD4BF}
+.switcher__hint{font-size:12px;color:#6E84A8;max-width:340px;line-height:1.5;text-align:right}
+
+/* ---------- 版本主体 ---------- */
+.ver{display:none;flex:1 1 auto;min-height:0}
+.ver.is-active{display:flex;flex-direction:column}
+.badge{display:inline-flex;align-items:center;gap:5px;padding:3px 9px;border-radius:999px;font-size:11px;font-weight:600;line-height:1}
+.chip{display:inline-flex;align-items:center;gap:4px;padding:2px 7px;border-radius:6px;font-size:10px;font-weight:700;letter-spacing:.2px}
+
+/* ============================================================
+   版本 A —— 调度舱
+   ============================================================ */
+.ver-a{background:radial-gradient(1200px 600px at 15% -10%,rgba(45,212,191,.08),transparent 60%),radial-gradient(900px 500px at 90% 0%,rgba(56,120,255,.07),transparent 55%),#0B1220}
+.va-top{display:flex;align-items:center;gap:16px;padding:14px 24px;border-bottom:1px solid #1B2640;flex:0 0 auto}
+.va-top h1{font-size:18px;font-weight:800;letter-spacing:.3px}
+.va-top .va-date{font-size:12px;color:#8CA3C3;margin-top:3px}
+.va-vehicle{display:flex;align-items:center;gap:10px;margin-left:14px;padding:7px 13px;border-radius:10px;background:#0F1930;border:1px solid #1E2B48}
+.va-vehicle .vv-cell{text-align:center;padding:0 8px}
+.va-vehicle .vv-cell + .vv-cell{border-left:1px solid #1E2B48}
+.va-vehicle .vv-k{font-size:10px;color:#6E84A8;letter-spacing:.4px}
+.va-vehicle .vv-v{font-size:13px;font-weight:800;color:#C7D5EC;margin-top:1px}
+.va-vehicle .vv-v.good{color:#2DD4BF}
+.va-vehicle .vv-v.warn{color:#F5A623}
+.va-countdown{display:flex;align-items:center;gap:8px;margin-left:auto;padding:8px 14px;border-radius:10px;background:rgba(245,165,35,.08);border:1px solid rgba(245,165,35,.35)}
+.va-countdown .cd-k{font-size:11px;color:#F5A623}
+.va-countdown .cd-v{font-size:15px;font-weight:900;color:#F5A623}
+.va-tabs{display:flex;gap:6px}
+.va-tab{padding:8px 14px;border-radius:8px;font-size:13px;font-weight:600;color:#8CA3C3;border:1px solid transparent}
+.va-tab:hover{color:#D6E2F5;background:#141F38}
+.va-tab.is-active{color:#2DD4BF;border-color:#2DD4BF;background:rgba(45,212,191,.08)}
+.va-window{padding:7px 12px;border-radius:8px;text-align:center;font-size:11px;font-weight:700;border:1px solid #2A3A5C;color:#B9C8E0;background:#111A2E}
+.va-window b{display:block;font-size:15px;color:#2DD4BF;margin-bottom:1px}
+
+.va-body{flex:1 1 auto;display:grid;grid-template-columns:minmax(0,1.55fr) minmax(330px,1fr);min-height:0}
+.va-track{overflow-y:auto;padding:18px 24px;border-right:1px solid #1B2640;min-height:0}
+.va-track h2{font-size:13px;font-weight:700;color:#8CA3C3;letter-spacing:1px;margin:2px 0 12px;display:flex;align-items:center;gap:8px}
+.va-track h2 .mono{color:#2DD4BF}
+.va-rail{position:relative;display:flex;gap:13px;padding:8px 0 16px}
+.va-rail::before{content:"";position:absolute;top:34px;left:34px;right:34px;height:2px;background:linear-gradient(90deg,#1F2A44,#24406b);border-radius:2px}
+.va-stop{position:relative;flex:1 1 0;min-width:158px;cursor:pointer;border-radius:12px;padding:13px 13px 11px;background:#101A2E;border:1px solid #1E2B48;transition:.18s}
+.va-stop:hover{border-color:#2A3A5C;transform:translateY(-2px)}
+.va-stop.is-sel{border-color:#2DD4BF;box-shadow:0 0 0 1px #2DD4BF,0 10px 30px -12px rgba(45,212,191,.35)}
+.va-stop .vs-head{display:flex;align-items:center;gap:8px;margin-bottom:9px}
+.va-stop .vs-eta{font-size:17px;font-weight:800;color:#2DD4BF}
+.va-stop .vs-seq{width:22px;height:22px;border-radius:50%;display:grid;place-items:center;font-size:11px;font-weight:700;background:#16233E;color:#6E84A8;border:1px solid #2A3A5C}
+.va-stop .vs-name{font-weight:700;font-size:14px;margin:2px 0 3px}
+.va-stop .vs-area{font-size:11px;color:#6E84A8}
+.va-stop .vs-load{display:flex;gap:8px;margin-top:9px;font-size:11px;color:#9DB1D0;flex-wrap:wrap}
+.va-stop .vs-load span{display:inline-flex;align-items:center;gap:4px}
+.va-stop .vs-slots{display:flex;gap:4px;margin-top:8px;flex-wrap:wrap}
+.slot-chip{padding:2px 6px;border-radius:5px;font-size:10px;font-weight:800;background:#16233E;border:1px solid #27406B;color:#7FA8E8;font-family:'JetBrains Mono',Consolas,monospace}
+.va-stop .vs-person{margin-top:9px;padding-top:8px;border-top:1px dashed #22304F;display:flex;align-items:center;gap:7px;font-size:12px;color:#C7D5EC}
+.va-stop .vs-person .pf{width:22px;height:22px;border-radius:50%;display:grid;place-items:center;background:#16233E;color:#8CA3C3;flex:0 0 auto}
+.va-stop .vs-none{color:#6E84A8;font-size:11px;font-style:normal}
+
+.va-manifest{margin-top:6px;background:#0F1930;border:1px solid #1E2B48;border-radius:12px;padding:14px 16px}
+.va-manifest h4{font-size:12px;color:#8CA3C3;letter-spacing:.6px;margin-bottom:11px;display:flex;align-items:center;gap:7px}
+.va-manifest .vm-grid{display:grid;grid-template-columns:repeat(12,1fr);gap:6px}
+.vm-cell{aspect-ratio:1.5;border-radius:6px;background:#131F38;border:1px solid #22304F;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:10px;font-weight:800;color:#6E84A8;font-family:'JetBrains Mono',Consolas,monospace}
+.vm-cell.has{border-color:#1F6B5A;background:rgba(23,184,166,.12);color:#2DD4BF}
+.vm-cell.has.free{border-color:#2A3A5C;background:#131F38;color:#5A6E8E}
+
+.va-side{display:flex;flex-direction:column;min-height:0}
+.va-detail{padding:18px 22px;border-bottom:1px solid #1B2640;flex:1 1 auto;overflow-y:auto}
+.va-detail h3{font-size:15px;font-weight:800;margin-bottom:4px;display:flex;align-items:center;gap:9px}
+.va-detail .vd-sub{font-size:12px;color:#8CA3C3;margin-bottom:15px}
+.vd-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px}
+.vd-cell{background:#0F1930;border:1px solid #1E2B48;border-radius:11px;padding:12px}
+.vd-cell .vc-label{font-size:11px;color:#6E84A8;letter-spacing:.4px;margin-bottom:6px;display:flex;align-items:center;gap:6px}
+.vd-cell .vc-main{font-weight:700;font-size:14px}
+.vd-cell .vc-sub{font-size:11px;color:#8CA3C3;margin-top:3px}
+.vd-actions{display:flex;gap:10px;margin-top:6px;flex-wrap:wrap}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;padding:9px 15px;border-radius:9px;font-size:13px;font-weight:700;transition:.16s;line-height:1}
+.btn-primary{background:#2DD4BF;color:#07251F}
+.btn-primary:hover{background:#3EE0CC}
+.btn-ghost{background:#141F38;color:#B9C8E0;border:1px solid #2A3A5C}
+.btn-ghost:hover{border-color:#3E5A8C;color:#fff}
+.btn-danger{background:rgba(244,114,114,.14);color:#F87171;border:1px solid rgba(244,114,114,.3)}
+.btn-danger:hover{background:rgba(244,114,114,.22)}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.vd-log{border-top:1px dashed #1E2B48;margin-top:13px;padding-top:12px}
+.vd-log .lg-title{font-size:11px;color:#6E84A8;letter-spacing:.5px;margin-bottom:8px;display:flex;align-items:center;gap:6px}
+.lg-row{display:flex;gap:9px;font-size:11px;color:#9DB1D0;padding:4px 0}
+.lg-row .lg-time{color:#5A6E8E;flex:0 0 auto;font-family:'JetBrains Mono',Consolas,monospace}
+.lg-row .lg-act{color:#C7D5EC}
+.issue-banner{display:flex;gap:9px;align-items:flex-start;background:rgba(244,114,114,.09);border:1px solid rgba(244,114,114,.35);border-radius:9px;padding:9px 11px;font-size:12px;color:#FBB5B5;margin-bottom:12px}
+.issue-banner b{color:#F87171}
+.person-card{display:flex;align-items:center;gap:10px;background:#0F1930;border:1px solid #1E2B48;border-radius:10px;padding:10px 12px;margin-bottom:8px}
+.person-card .pc-role{font-size:10px;font-weight:800;padding:2px 8px;border-radius:6px;background:#16233E;color:#7FA8E8;flex:0 0 auto}
+.person-card .pc-role.main{background:rgba(45,212,191,.15);color:#2DD4BF}
+.person-card .pc-name{font-weight:700;font-size:13px}
+.person-card .pc-meta{font-size:11px;color:#8CA3C3;margin-top:1px}
+.person-card .pc-right{margin-left:auto;text-align:right}
+.person-card .pc-right .pc-score{font-size:12px;font-weight:800;color:#F5A623}
+.person-card .pc-right .pc-state{font-size:10px;color:#2DD4BF}
+
+.va-summary{padding:14px 22px;background:#0D1526;border-top:1px solid #1B2640;flex:0 0 auto;max-height:42%;overflow-y:auto}
+.va-summary .vs-row{display:flex;align-items:center;gap:12px;margin-bottom:9px}
+.va-summary .vs-label{font-size:12px;color:#8CA3C3;flex:0 0 auto}
+.va-bar{flex:1 1 auto;height:8px;background:#141F38;border-radius:99px;overflow:hidden}
+.va-bar i{display:block;height:100%;border-radius:99px;background:linear-gradient(90deg,#17B8A6,#2DD4BF);transition:.4s}
+.va-summary .vs-num{font-size:13px;font-weight:800;color:#2DD4BF}
+.va-metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:10px 0 12px}
+.va-metric{background:#0F1930;border:1px solid #1E2B48;border-radius:9px;padding:9px 11px}
+.va-metric .vm-k{font-size:10px;color:#6E84A8;letter-spacing:.4px}
+.va-metric .vm-v{font-size:15px;font-weight:900;color:#C7D5EC;margin-top:2px}
+.va-metric .vm-v.good{color:#2DD4BF}
+.va-metric .vm-v.warn{color:#F5A623}
+.va-alerts{display:flex;flex-direction:column;gap:7px;margin-top:6px}
+.va-alert{display:flex;align-items:center;gap:10px;font-size:12px;padding:8px 12px;border-radius:9px;background:#0F1930;border:1px solid #1E2B48}
+.va-alert.warn{border-color:rgba(245,165,35,.4);background:rgba(245,165,35,.07)}
+.va-alert.bad{border-color:rgba(244,114,114,.4);background:rgba(244,114,114,.07)}
+.va-alert .al-dot{width:8px;height:8px;border-radius:50%;flex:0 0 auto}
+.va-alert .al-msg{color:#C7D5EC}
+.va-alert .al-tag{margin-left:auto;font-size:11px;color:#8CA3C3}
+
+/* ============================================================
+   版本 B —— 企业工作台
+   ============================================================ */
+.ver-b{background:#F4F5F1}
+.vb-layout{display:flex;flex:1 1 auto;min-height:0}
+.vb-nav{width:220px;background:#FFFFFF;border-right:1px solid #E5E7E0;padding:18px 12px;display:flex;flex-direction:column;flex:0 0 auto}
+.vb-brand{display:flex;align-items:center;gap:10px;padding:4px 8px 18px;border-bottom:1px solid #EDEFE9;margin-bottom:12px}
+.vb-brand .vb-logo{width:34px;height:34px;border-radius:9px;background:#1F6B4F;color:#fff;display:grid;place-items:center}
+.vb-brand b{font-size:14px;font-weight:800;color:#1A2B25}
+.vb-brand span{display:block;font-size:11px;color:#7A8A82;margin-top:1px}
+.vb-navitem{display:flex;align-items:center;gap:10px;padding:11px 12px;border-radius:9px;font-size:13px;font-weight:600;color:#4A5A52;margin-bottom:2px;transition:.15s;text-align:left}
+.vb-navitem:hover{background:#F0F3EC}
+.vb-navitem.is-active{background:#E5EFE7;color:#1F6B4F}
+.vb-navitem .ni-badge{margin-left:auto;font-size:11px;background:#1F6B4F;color:#fff;padding:1px 7px;border-radius:99px;font-weight:700}
+.vb-navitem .ni-badge.warn{background:#C98A2D}
+.vb-nav .vb-foot{margin-top:auto;font-size:11px;color:#9AA79F;padding:10px 12px;line-height:1.6}
+.vb-main{flex:1 1 auto;min-width:0;overflow-y:auto;padding:22px 26px}
+.vb-head{display:flex;align-items:flex-start;gap:16px;margin-bottom:18px}
+.vb-head h1{font-size:20px;font-weight:900;color:#1A2B25;letter-spacing:.2px}
+.vb-head p{font-size:12px;color:#7A8A82;margin-top:4px}
+.vb-head .vb-date{margin-left:auto;font-size:12px;color:#7A8A82;background:#fff;border:1px solid #E5E7E0;padding:7px 12px;border-radius:8px;display:flex;align-items:center;gap:6px}
+.vb-kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:18px}
+.vb-kpi{background:#fff;border:1px solid #E5E7E0;border-radius:13px;padding:15px 16px}
+.vb-kpi .k-label{font-size:12px;color:#7A8A82;display:flex;align-items:center;gap:6px}
+.vb-kpi .k-num{font-size:26px;font-weight:900;color:#1A2B25;margin-top:8px;letter-spacing:.3px}
+.vb-kpi .k-sub{font-size:11px;color:#9AA79F;margin-top:5px}
+.vb-kpi .k-num.good{color:#1F6B4F}
+.vb-kpi .k-num.warn{color:#B06E15}
+.vb-kpi .k-num.bad{color:#C2453D}
+.vb-filter{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;align-items:center}
+.vb-fgroup{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.vb-fbtn{padding:8px 14px;border-radius:8px;font-size:12px;font-weight:600;color:#4A5A52;background:#fff;border:1px solid #E5E7E0;transition:.15s}
+.vb-fbtn:hover{border-color:#C6CDBF}
+.vb-fbtn.is-active{background:#1F6B4F;color:#fff;border-color:#1F6B4F}
+.vb-table{background:#fff;border:1px solid #E5E7E0;border-radius:13px;overflow:hidden}
+.vb-table table{width:100%;border-collapse:collapse;font-size:13px}
+.vb-table th{text-align:left;font-size:11px;color:#7A8A82;font-weight:600;padding:11px 14px;background:#FAFBF7;border-bottom:1px solid #EDEFE9;letter-spacing:.4px}
+.vb-table td{padding:12px 14px;border-bottom:1px solid #F1F3EC;color:#2B3D35;vertical-align:middle}
+.vb-table tr:last-child td{border-bottom:none}
+.vb-table tr.clickable{cursor:pointer}
+.vb-table tr.clickable:hover td{background:#F6F8F3}
+.vb-table .t-strong{font-weight:700;color:#1A2B25}
+.vb-table .t-muted{font-size:11px;color:#9AA79F}
+.status-pill{display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:700;padding:4px 10px;border-radius:999px}
+.status-pill .sp-dot{width:6px;height:6px;border-radius:50%}
+.st-ready{background:#E3F1E6;color:#1F6B4F}
+.st-ready .sp-dot{background:#2F9E6E}
+.st-partial,.st-escalated{background:#FBF0DC;color:#9A6A12}
+.st-partial .sp-dot,.st-escalated .sp-dot{background:#D9922E}
+.st-broadcast{background:#FBE4E1;color:#B23A32}
+.st-broadcast .sp-dot{background:#D24B42}
+.st-done{background:#E4ECF3;color:#3D6487}
+.st-done .sp-dot{background:#5A87B0}
+.vb-empty{padding:34px;text-align:center;color:#9AA79F;font-size:13px}
+.slot-chip.light{background:#F0F3EC;border:1px solid #D8DED2;color:#4A5A52}
+
+/* 抽屉 */
+.vb-drawer{position:fixed;top:0;right:0;bottom:0;width:440px;background:#fff;border-left:1px solid #E5E7E0;box-shadow:-18px 0 40px -20px rgba(26,43,37,.25);transform:translateX(105%);transition:transform .28s;z-index:40;display:flex;flex-direction:column}
+.vb-drawer.open{transform:translateX(0)}
+.vd-head{padding:18px 20px;border-bottom:1px solid #EDEFE9;display:flex;align-items:flex-start;gap:12px}
+.vd-head h3{font-size:16px;font-weight:800;color:#1A2B25}
+.vd-head p{font-size:12px;color:#7A8A82;margin-top:3px}
+.vd-close{margin-left:auto;width:30px;height:30px;border-radius:8px;display:grid;place-items:center;color:#7A8A82}
+.vd-close:hover{background:#F0F3EC}
+.vd-body{padding:18px 20px;overflow-y:auto;flex:1 1 auto}
+.vd-sec{margin-bottom:17px}
+.vd-sec .vs-title{font-size:11px;font-weight:700;color:#9AA79F;letter-spacing:.6px;margin-bottom:9px;display:flex;align-items:center;gap:6px}
+.bind-row{display:flex;align-items:center;gap:11px;padding:11px 13px;border:1px solid #EDEFE9;border-radius:11px;margin-bottom:8px;background:#FAFBF7}
+.bind-row .br-role{font-size:10px;font-weight:700;padding:2px 8px;border-radius:6px;background:#EDF0EA;color:#5C6B63;flex:0 0 auto}
+.bind-row .br-role.main{background:#1F6B4F;color:#fff}
+.bind-row .br-name{font-weight:700;font-size:13px;color:#1A2B25}
+.bind-row .br-sub{font-size:11px;color:#7A8A82;margin-top:1px}
+.bind-row .br-state{margin-left:auto;font-size:11px;font-weight:700;text-align:right}
+.bind-row .br-state.ok{color:#1F6B4F}
+.bind-row .br-state.no{color:#B06E15}
+.bind-row .br-state .br-phone{display:block;font-size:10px;color:#9AA79F;font-weight:500;margin-top:2px}
+.bind-empty{padding:14px;text-align:center;color:#9AA79F;font-size:12px;border:1px dashed #D8DED2;border-radius:11px}
+.vd-actions{display:flex;flex-direction:column;gap:9px}
+.vb-btn{display:flex;align-items:center;justify-content:center;gap:8px;padding:11px 16px;border-radius:10px;font-size:13px;font-weight:700;transition:.15s}
+.vb-btn.primary{background:#1F6B4F;color:#fff}
+.vb-btn.primary:hover{background:#185A41}
+.vb-btn.soft{background:#E5EFE7;color:#1F6B4F}
+.vb-btn.soft:hover{background:#DBE9DD}
+.vb-btn.warn-soft{background:#FBF0DC;color:#9A6A12}
+.vb-btn.warn-soft:hover{background:#F7E6C2}
+.vb-btn.danger-soft{background:#FBE4E1;color:#B23A32}
+.vb-btn.danger-soft:hover{background:#F7D6D1}
+.vb-btn:disabled{opacity:.5;cursor:not-allowed}
+.vd-log{border-top:1px dashed #EDEFE9;padding-top:11px}
+.lg-row.light{color:#5C6B63}
+.lg-row.light .lg-time{color:#9AA79F}
+.lg-row.light .lg-act{color:#4A5A52}
+
+/* 表单（新建任务） */
+.vb-form{background:#fff;border:1px solid #E5E7E0;border-radius:13px;padding:22px;max-width:720px}
+.vb-form .f-row{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:15px}
+.vb-form .f-field{display:flex;flex-direction:column;gap:6px}
+.vb-form .f-field.full{grid-column:1/-1}
+.vb-form label{font-size:12px;font-weight:700;color:#4A5A52}
+.vb-form input,.vb-form select,.vb-form textarea{border:1px solid #D8DED2;border-radius:9px;padding:10px 12px;font-size:13px;font-family:inherit;color:#1A2B25;background:#fff;outline:none;transition:.15s}
+.vb-form input:focus,.vb-form select:focus,.vb-form textarea:focus{border-color:#1F6B4F;box-shadow:0 0 0 3px rgba(31,107,79,.12)}
+.vb-form .f-hint{font-size:11px;color:#9AA79F}
+.vb-form .f-actions{display:flex;gap:10px;margin-top:6px}
+.vb-form .f-submit{display:inline-flex;align-items:center;gap:8px;padding:12px 20px;border-radius:10px;background:#1F6B4F;color:#fff;font-size:14px;font-weight:800}
+.vb-form .f-submit:hover{background:#185A41}
+.vb-form .f-cancel{padding:12px 18px;border-radius:10px;background:#F0F3EC;color:#4A5A52;font-size:13px;font-weight:700}
+.checkline{display:flex;align-items:center;gap:8px;font-size:13px;color:#2B3D35;padding:8px 0}
+
+/* 结算 */
+.vb-settle-grid{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(280px,1fr);gap:18px;align-items:start}
+.vb-total{background:#fff;border:1px solid #E5E7E0;border-radius:13px;padding:18px}
+.vb-total .tot-row{display:flex;justify-content:space-between;align-items:center;padding:9px 0;font-size:13px;color:#2B3D35}
+.vb-total .tot-row + .tot-row{border-top:1px dashed #EDEFE9}
+.vb-total .tot-row .tr-label{color:#7A8A82}
+.vb-total .tot-row b{font-weight:800;color:#1A2B25}
+.vb-total .tot-row.total b{color:#1F6B4F;font-size:16px}
+.vb-total .tot-note{font-size:11px;color:#9AA79F;margin-top:10px;line-height:1.6}
+.vb-note{font-size:11px;color:#9AA79F;margin-top:12px;line-height:1.6;background:#fff;border:1px solid #E5E7E0;border-radius:13px;padding:14px 16px}
+.vb-bills{display:flex;gap:10px;margin-top:12px;flex-wrap:wrap}
+.vb-bills .bill{padding:9px 15px;border-radius:9px;background:#fff;border:1px solid #E5E7E0;font-size:12px;font-weight:700;color:#4A5A52}
+.vb-bills .bill:hover{border-color:#1F6B4F;color:#1F6B4F}
+
+/* ============================================================
+   版本 C —— 履约现场
+   ============================================================ */
+.ver-c{background:#0F1418;color:#EDF2F5}
+.vc-top{display:flex;align-items:center;gap:16px;padding:13px 22px;background:#131A20;border-bottom:1px solid #232D36;flex:0 0 auto}
+.vc-top .vc-me{display:flex;align-items:center;gap:12px}
+.vc-avatar{width:40px;height:40px;border-radius:11px;background:#A3D93C;color:#101418;display:grid;place-items:center;font-weight:900;font-size:15px}
+.vc-me b{font-size:15px;font-weight:800;display:block}
+.vc-me span{font-size:12px;color:#8FA0AD;display:block;margin-top:2px}
+.vc-badge{display:flex;align-items:center;gap:6px;padding:6px 12px;border-radius:8px;font-size:12px;font-weight:700;background:#1A232C;border:1px solid #2A3642;color:#A9BBC8}
+.vc-shift{margin-left:auto;display:flex;gap:10px}
+.vc-shift .sh-cell{background:#1A232C;border:1px solid #2A3642;border-radius:10px;padding:8px 14px;text-align:center;min-width:80px}
+.vc-shift .sh-cell .sc-num{font-size:20px;font-weight:900;color:#A3D93C}
+.vc-shift .sh-cell .sc-label{font-size:10px;color:#8FA0AD;margin-top:2px;letter-spacing:.4px}
+.vc-shift .sh-cell.warn .sc-num{color:#FFB020}
+.vc-body{flex:1 1 auto;display:grid;grid-template-columns:minmax(0,1.3fr) minmax(350px,1fr);min-height:0}
+.vc-list{padding:18px 22px;overflow-y:auto;border-right:1px solid #1D262E;min-height:0}
+.vc-list h2{font-size:13px;font-weight:800;color:#8FA0AD;letter-spacing:1px;margin-bottom:13px;display:flex;align-items:center;gap:8px}
+/* 抢单大厅 */
+.vc-grab{margin:0 18px 16px;background:linear-gradient(135deg,rgba(245,166,35,.09),rgba(163,217,60,.05));border:1px solid rgba(245,166,35,.28);border-radius:13px;padding:13px 15px}
+.vg-head{font-size:13px;font-weight:800;color:#FFB020;display:flex;align-items:center;gap:8px;margin-bottom:10px}
+.vg-head .t-muted{font-weight:400}
+.vg-item{display:flex;align-items:center;gap:10px;background:#131A20;border:1px solid #232D36;border-radius:10px;padding:10px 12px;margin-bottom:8px}
+.vg-item:last-child{margin-bottom:0}
+.vg-info{flex:1 1 auto;min-width:0}
+.vg-info b{display:block;font-size:13.5px;color:#EDF2F5}
+.vg-info span{font-size:11.5px;color:#8FA0AD;margin-top:2px;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.vg-fee{font-size:14px;font-weight:900;color:#A3D93C;white-space:nowrap}
+.vg-btn{background:rgba(163,217,60,.14);color:#A3D93C;border:1px solid rgba(163,217,60,.4);border-radius:8px;font-size:12px;font-weight:700;padding:7px 12px;cursor:pointer;display:inline-flex;align-items:center;gap:4px;white-space:nowrap}
+.vg-btn:hover{background:rgba(163,217,60,.26)}
+.vc-task{display:flex;align-items:center;gap:14px;background:#131A20;border:1px solid #232D36;border-radius:13px;padding:14px 15px;margin-bottom:11px;cursor:pointer;transition:.16s}
+.vc-task:hover{border-color:#33414F}
+.vc-task.is-sel{border-color:#A3D93C;box-shadow:0 0 0 1px #A3D93C,0 10px 28px -14px rgba(163,217,60,.4)}
+.vc-task .vt-light{width:9px;height:9px;border-radius:50%;flex:0 0 auto;align-self:flex-start;margin-top:5px}
+.vc-task .vt-main{flex:1 1 auto;min-width:0}
+.vc-task .vt-name{font-weight:800;font-size:15px;color:#EDF2F5}
+.vc-task .vt-meta{font-size:12px;color:#8FA0AD;margin-top:4px;display:flex;gap:11px;flex-wrap:wrap}
+.vc-task .vt-meta span{display:inline-flex;align-items:center;gap:5px}
+.vc-task .vt-extra{display:flex;align-items:center;gap:6px;margin-top:8px;flex-wrap:wrap}
+.vc-task .vt-fee{text-align:right}
+.vc-task .vt-fee b{font-size:17px;font-weight:900;color:#A3D93C;display:block}
+.vc-task .vt-fee span{font-size:11px;color:#8FA0AD}
+.vc-task .vt-issue{display:inline-flex;align-items:center;gap:4px;font-size:10px;font-weight:700;color:#FF6B6B;background:rgba(255,90,90,.1);border:1px solid rgba(255,90,90,.3);padding:2px 7px;border-radius:6px}
+.vc-ops{padding:18px 22px;overflow-y:auto;min-height:0}
+.vc-ops h3{font-size:15px;font-weight:800;margin-bottom:4px;display:flex;align-items:center;gap:9px}
+.vc-ops .vo-sub{font-size:12px;color:#8FA0AD;margin-bottom:15px}
+.vo-steps{display:flex;align-items:center;gap:6px;margin-bottom:18px;flex-wrap:wrap}
+.vo-step{display:flex;align-items:center;gap:7px;font-size:12px;font-weight:700;color:#6C7E8C}
+.vo-step .st-ic{width:24px;height:24px;border-radius:50%;display:grid;place-items:center;background:#1A232C;border:1px solid #2A3642;color:#6C7E8C;font-size:11px}
+.vo-step.is-done{color:#8FA0AD}
+.vo-step.is-done .st-ic{background:#1F2E18;border-color:#3A5A26;color:#A3D93C}
+.vo-step.is-cur{color:#EDF2F5}
+.vo-step.is-cur .st-ic{background:#A3D93C;border-color:#A3D93C;color:#101418}
+.vo-step .st-line{width:26px;height:2px;background:#2A3642}
+.vo-panel{background:#131A20;border:1px solid #232D36;border-radius:14px;padding:19px}
+.vo-panel .vp-label{font-size:11px;color:#8FA0AD;letter-spacing:.6px;margin-bottom:12px}
+.vc-bigbtn{width:100%;display:flex;align-items:center;justify-content:center;gap:10px;padding:17px;border-radius:13px;font-size:16px;font-weight:900;color:#101418;background:#A3D93C;transition:.16s;letter-spacing:.5px}
+.vc-bigbtn:hover{background:#B4E95A}
+.vc-bigbtn.secondary{background:#2A3642;color:#EDF2F5}
+.vc-bigbtn.secondary:hover{background:#33414F}
+.vc-bigbtn:disabled{background:#232D36;color:#6C7E8C;cursor:not-allowed}
+.vo-scan{display:flex;align-items:center;gap:14px;background:#0C1014;border:1px dashed #3A5A26;border-radius:12px;padding:15px;margin-bottom:14px}
+.vo-scan .scan-ic{width:44px;height:44px;border-radius:10px;background:#1F2E18;color:#A3D93C;display:grid;place-items:center;flex:0 0 auto}
+.vo-scan b{font-size:14px;color:#EDF2F5;display:block}
+.vo-scan span{font-size:12px;color:#8FA0AD;display:block;margin-top:2px}
+.vo-info{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin-bottom:14px}
+.vo-info .vi-cell{background:#0C1014;border:1px solid #232D36;border-radius:10px;padding:10px 12px}
+.vo-info .vi-cell .vik{font-size:10px;color:#6C7E8C;letter-spacing:.4px}
+.vo-info .vi-cell .viv{font-size:14px;font-weight:800;color:#EDF2F5;margin-top:3px}
+.vo-info .vi-cell .viv.good{color:#A3D93C}
+.vo-income{margin-top:15px}
+.vo-income .vi-row{display:flex;justify-content:space-between;font-size:13px;padding:8px 0;color:#C6D3DC;border-bottom:1px dashed #1D262E}
+.vo-income .vi-row:last-child{border-bottom:none}
+.vo-income .vi-row b{color:#EDF2F5}
+.vo-income .vi-total{font-size:15px;font-weight:900;color:#A3D93C}
+.vo-anomaly{background:#0C1014;border:1px solid rgba(255,90,90,.3);border-radius:11px;padding:14px;margin-top:13px}
+.vo-anomaly .an-title{font-size:11px;font-weight:800;color:#FF8A8A;margin-bottom:9px;display:flex;align-items:center;gap:6px}
+.vo-anomaly select,.vo-anomaly textarea{border:1px solid #33414F;border-radius:8px;padding:9px 11px;font-size:12px;font-family:inherit;color:#EDF2F5;background:#131A20;outline:none;width:100%;margin-bottom:9px}
+.vo-anomaly select option{background:#131A20}
+.vo-anomaly textarea{resize:vertical;min-height:54px}
+.vo-anomaly .an-btn{display:inline-flex;align-items:center;gap:7px;padding:9px 15px;border-radius:9px;background:rgba(255,90,90,.18);color:#FF8A8A;font-size:13px;font-weight:800}
+.vo-anomaly .an-btn:hover{background:rgba(255,90,90,.28)}
+.vo-history{margin-top:14px}
+.vo-history .vh-title{font-size:11px;color:#6C7E8C;letter-spacing:.5px;margin-bottom:7px}
+.lg-row.dark{color:#8FA0AD}
+.lg-row.dark .lg-time{color:#5A6E8E}
+.lg-row.dark .lg-act{color:#A9BBC8}
+
+/* ---------- 提示条 ---------- */
+.ver-banner{display:flex;align-items:center;gap:10px;font-size:12px;padding:9px 22px;flex:0 0 auto}
+.ver-banner .bn-tag{font-weight:800;padding:2px 9px;border-radius:6px;letter-spacing:.4px;flex:0 0 auto}
+.ver-a .ver-banner{background:#0D1526;color:#8CA3C3;border-bottom:1px solid #1B2640}
+.ver-a .ver-banner .bn-tag{background:rgba(45,212,191,.14);color:#2DD4BF}
+.ver-b .ver-banner{background:#EDF0E9;color:#5C6B63;border-bottom:1px solid #E5E7E0}
+.ver-b .ver-banner .bn-tag{background:#1F6B4F;color:#fff}
+.ver-c .ver-banner{background:#11181E;color:#8FA0AD;border-bottom:1px solid #1D262E}
+.ver-c .ver-banner .bn-tag{background:rgba(163,217,60,.14);color:#A3D93C}
+.ver-banner .bn-actions{margin-left:auto;display:flex;gap:8px}
+.ver-banner .bn-btn{font-size:11px;font-weight:700;padding:5px 12px;border-radius:7px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);color:currentColor}
+.ver-banner .bn-btn:hover{background:rgba(255,255,255,.12)}
+.toast{position:fixed;left:50%;bottom:30px;transform:translateX(-50%) translateY(20px);opacity:0;pointer-events:none;background:#101418;color:#EDF2F5;border:1px solid #2A3642;padding:12px 20px;border-radius:10px;font-size:13px;font-weight:600;box-shadow:0 12px 30px -12px rgba(0,0,0,.5);transition:.25s;z-index:99;max-width:480px}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+/* ============================================================
+   登录 / 角色选择层
+   ============================================================ */
+.login{position:fixed;inset:0;z-index:100;display:flex;align-items:center;justify-content:center;padding:24px;overflow-y:auto;
+  background:radial-gradient(1100px 560px at 12% -8%,rgba(45,212,191,.14),transparent 58%),radial-gradient(900px 600px at 96% 4%,rgba(56,120,255,.13),transparent 55%),radial-gradient(900px 700px at 50% 115%,rgba(148,98,255,.10),transparent 60%),#0B1220}
+.login__card{width:min(880px,100%);background:rgba(13,20,36,.86);border:1px solid #1F2A44;border-radius:22px;padding:38px 40px 30px;box-shadow:0 30px 80px -20px rgba(0,0,0,.6);backdrop-filter:blur(10px)}
+.login__logo{width:52px;height:52px;border-radius:14px;display:grid;place-items:center;background:linear-gradient(135deg,#17B8A6,#0E7C6E);color:#fff;font-size:22px;margin-bottom:14px}
+.login__brand h1{font-size:25px;font-weight:900;letter-spacing:.5px}
+.login__brand p{font-size:13px;color:#7FA8E8;margin-top:5px;letter-spacing:1px}
+.login__desc{font-size:13px;color:#8CA3C3;line-height:1.7;margin:18px 0 20px;max-width:620px}
+.login__roles{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}
+.login__role{display:flex;flex-direction:column;gap:9px;text-align:left;padding:18px 17px;border-radius:14px;background:#101A2E;border:1px solid #1E2B48;transition:.2s;color:inherit}
+.login__role:hover{border-color:#2DD4BF;transform:translateY(-3px);box-shadow:0 14px 34px -14px rgba(45,212,191,.4)}
+.login__role:active{transform:translateY(0)}
+.lr-ic{width:40px;height:40px;border-radius:11px;display:grid;place-items:center;font-size:18px;font-weight:800;flex:0 0 auto}
+.lr-a{background:linear-gradient(135deg,#0E3A33,#17494a);color:#2DD4BF;border:1px solid rgba(45,212,191,.4)}
+.lr-b{background:linear-gradient(135deg,#12372a,#1F6B4F);color:#4ADE9C;border:1px solid rgba(74,222,156,.4)}
+.lr-c{background:linear-gradient(135deg,#3A2A12,#6B4F1F);color:#F5A623;border:1px solid rgba(245,165,35,.4)}
+.lr-m{background:linear-gradient(135deg,#1A2540,#2E4A8C);color:#7FA8E8;border:1px solid rgba(127,168,232,.4)}
+.lr-name{font-size:15px;font-weight:800;color:#E6EDF7}
+.lr-desc{font-size:11px;color:#8CA3C3;line-height:1.6;min-height:52px}
+.lr-tags{display:flex;flex-wrap:wrap;gap:5px;margin-top:auto}
+.lr-tags i{font-style:normal;font-size:10px;font-weight:700;padding:3px 8px;border-radius:99px;background:#16233E;color:#7FA8E8;border:1px solid #27406B}
+.login__demo{margin-top:24px;width:100%;padding:12px;border-radius:11px;font-size:13px;font-weight:700;color:#8CA3C3;background:#101A2E;border:1px dashed #2A3A5C;transition:.18s}
+.login__demo:hover{color:#2DD4BF;border-color:#2DD4BF;background:#0F1930}
+/* 顶部切换角色按钮 */
+.switcher__exit{padding:8px 14px;border-radius:9px;font-size:12px;font-weight:700;color:#D6E2F5;background:#16203A;border:1px solid #2A3A5C;flex:0 0 auto;transition:.16s}
+.switcher__exit:hover{border-color:#2DD4BF;color:#2DD4BF}
+
+/* ============================================================
+   版本 M —— 运营管理台
+   ============================================================ */
+.ver-m{background:radial-gradient(1200px 600px at 15% -10%,rgba(127,168,232,.09),transparent 60%),radial-gradient(900px 500px at 90% 0%,rgba(45,212,191,.06),transparent 55%),#0B1220}
+.vm-banner{background:linear-gradient(90deg,rgba(127,168,232,.12),rgba(45,212,191,.06))!important;border-color:#23314F!important}
+.vm-top{display:flex;align-items:center;gap:14px;padding:12px 22px;border-bottom:1px solid #1B2640;flex:0 0 auto;flex-wrap:wrap}
+.vm-navs{display:flex;gap:6px;flex-wrap:wrap}
+.vm-nav{display:inline-flex;align-items:center;gap:7px;padding:9px 15px;border-radius:9px;font-size:13px;font-weight:700;color:#8CA3C3;background:#0F1930;border:1px solid #1E2B48;transition:.16s}
+.vm-nav:hover{color:#D6E2F5;border-color:#2A3A5C}
+.vm-nav.is-active{color:#0B1220;background:#7FA8E8;border-color:#7FA8E8}
+.vm-nav.is-active svg{stroke:#0B1220}
+.vm-meta{margin-left:auto;display:flex;gap:10px;font-size:11px;color:#6E84A8}
+.vm-meta span{padding:5px 10px;border-radius:8px;background:#0F1930;border:1px solid #1E2B48}
+.vm-body{flex:1 1 auto;overflow-y:auto;padding:18px 22px}
+.vm-card{background:#0F1930;border:1px solid #1E2B48;border-radius:13px;margin-bottom:16px;overflow:hidden}
+.vm-card-head{display:flex;align-items:center;gap:10px;padding:14px 18px;border-bottom:1px solid #1B2640;flex-wrap:wrap}
+.vm-card-head h3{font-size:14px;font-weight:800;color:#E6EDF7;display:flex;align-items:center;gap:8px}
+.vm-card-head .vm-ops{margin-left:auto;display:flex;gap:8px}
+.vm-rdot{width:11px;height:11px;border-radius:50%;flex:0 0 auto;display:inline-block}
+.vm-hint{font-size:11px;color:#6E84A8;font-weight:400}
+.vm-ops{display:flex;gap:6px;flex-wrap:wrap}
+.vm-btn{display:inline-flex;align-items:center;gap:6px;padding:7px 12px;border-radius:8px;font-size:12px;font-weight:700;background:#141F38;color:#B9C8E0;border:1px solid #2A3A5C;transition:.15s}
+.vm-btn:hover{border-color:#3E5A8C;color:#fff}
+.vm-btn.primary{background:#2DD4BF;color:#07251F;border-color:#2DD4BF}
+.vm-btn.primary:hover{background:#3EE0CC}
+.vm-btn.ghost{background:transparent;color:#7FA8E8;border-color:#2A3A5C}
+.vm-btn.ghost:hover{border-color:#3E5A8C;color:#fff;background:#0F1930}
+.vm-btn.warn{background:rgba(245,166,35,.12);color:#F5A623;border-color:rgba(245,166,35,.35)}
+.vm-btn.warn:hover{background:rgba(245,166,35,.22)}
+/* 到场定位校验 */
+.chk-row{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:9px 0;border-bottom:1px dashed #1E2B48;font-size:12.5px}
+.chk-row span{color:#5A6E8E}
+.chk-row b{color:#E7EDF7;font-weight:600;text-align:right;word-break:break-all}
+.chk-ok{margin-top:12px;background:rgba(45,212,191,.1);border:1px solid rgba(45,212,191,.35);color:#2DD4BF;border-radius:9px;padding:10px 12px;font-size:12.5px;line-height:1.6}
+.chk-far{margin-top:12px;background:rgba(245,166,35,.1);border:1px solid rgba(245,166,35,.35);color:#F5A623;border-radius:9px;padding:10px 12px;font-size:12.5px;line-height:1.6}
+.chk-far b{color:#FBBF24}
+.vm-btn.danger{background:rgba(244,114,114,.12);color:#F87171;border-color:rgba(244,114,114,.3)}
+.vm-btn.danger:hover{background:rgba(244,114,114,.22)}
+.vm-add-route{width:100%;justify-content:center;padding:13px;border-style:dashed;background:transparent;border-color:#2A3A5C}
+/* 深色表格覆写 */
+.vm-table{background:#0F1930;border:1px solid #1E2B48;border-radius:0}
+.vm-table th{background:#0C1424;color:#7FA8E8;border-bottom:1px solid #1B2640;font-weight:700}
+.vm-table td{background:transparent;color:#C7D5EC;border-bottom:1px solid #16233E}
+.vm-table tr:hover td{background:#121E36}
+.vm-table .t-muted{color:#6E84A8}
+.vm-table .mono{font-family:'JetBrains Mono',Consolas,monospace}
+.vm-batt{display:inline-block;width:46px;height:8px;border-radius:99px;background:#16233E;overflow:hidden;margin-right:7px;vertical-align:middle}
+.vm-batt i{display:block;height:100%;background:linear-gradient(90deg,#17B8A6,#2DD4BF);border-radius:99px}
+.vm-stop{display:flex;align-items:center;gap:12px;padding:11px 18px;border-bottom:1px solid #16233E}
+.vm-stop:last-child{border-bottom:none}
+.vm-stop:hover{background:#121E36}
+.vs-seq{width:22px;height:22px;border-radius:50%;display:grid;place-items:center;font-size:11px;font-weight:700;background:#16233E;color:#7FA8E8;border:1px solid #27406B;flex:0 0 auto}
+.vm-stop .vs-main{flex:1 1 auto;min-width:0}
+.vm-stop .vs-main b{font-size:13px;color:#E6EDF7;display:block}
+.vm-stop .vs-main .t-muted{font-size:11px;color:#6E84A8;margin-top:2px}
+.vm-stop .vs-ops{flex:0 0 auto}
+.vm-empty-td{text-align:center;color:#6E84A8;padding:26px!important}
+.vm-route-meta{display:flex;gap:16px;padding:10px 18px;font-size:11px;color:#8CA3C3;border-bottom:1px solid #16233E;flex-wrap:wrap}
+/* 弹窗 */
+.vm-modal{position:fixed;inset:0;z-index:120;display:none;align-items:center;justify-content:center;padding:18px;background:rgba(4,8,16,.66);backdrop-filter:blur(4px)}
+.vm-modal.open{display:flex}
+.vm-modal-box{width:min(460px,100%);max-height:88vh;display:flex;flex-direction:column;background:#0F1930;border:1px solid #2A3A5C;border-radius:15px;box-shadow:0 26px 70px -18px rgba(0,0,0,.7);overflow:hidden}
+.vm-modal-head{display:flex;align-items:center;padding:14px 18px;border-bottom:1px solid #1B2640;flex:0 0 auto}
+.vm-modal-head b{font-size:15px;font-weight:800;color:#E6EDF7}
+.vm-modal-x{margin-left:auto;color:#6E84A8;font-size:15px;padding:4px;display:grid;place-items:center}
+.vm-modal-x:hover{color:#F87171}
+.vm-modal-body{padding:16px 18px;overflow-y:auto}
+.vm-form{display:flex;flex-direction:column;gap:11px}
+.vm-frow{display:flex;flex-direction:column;gap:6px}
+.vm-frow label{font-size:12px;color:#8CA3C3;font-weight:600}
+.vm-frow input,.vm-frow select,.vm-frow textarea{width:100%;padding:10px 12px;border-radius:9px;background:#0C1424;border:1px solid #22304F;color:#E6EDF7;font-size:13px;font-family:inherit;outline:none}
+.vm-frow input:focus,.vm-frow select:focus,.vm-frow textarea:focus{border-color:#2DD4BF}
+.vm-frow input[readonly]{opacity:.6}
+.vm-frow select option{background:#0F1930}
+.vm-form-foot{display:flex;gap:10px;justify-content:flex-end;margin-top:6px}
+.vm-confirm p{font-size:14px;color:#C7D5EC;line-height:1.7;margin-bottom:16px}
+/* 地图 */
+.vm-map-wrap{position:relative;height:100%;min-height:420px}
+.vm-map{position:absolute;inset:0;border-radius:13px;border:1px solid #1E2B48;z-index:1;background:#0C1424}
+.vm-map-legend{position:absolute;top:12px;left:12px;z-index:500;display:flex;gap:8px;flex-wrap:wrap;background:rgba(11,18,32,.9);border:1px solid #22304F;border-radius:10px;padding:8px 11px;max-width:calc(100% - 24px)}
+.vm-map-legend span{display:inline-flex;align-items:center;gap:6px;font-size:11px;color:#C7D5EC;font-weight:600}
+.vm-map-legend i{width:10px;height:10px;border-radius:50%;display:inline-block}
+.vm-map-tip{position:absolute;left:12px;bottom:12px;z-index:500;font-size:11px;color:#8CA3C3;background:rgba(11,18,32,.9);border:1px solid #22304F;border-radius:8px;padding:6px 10px;max-width:calc(100% - 24px);line-height:1.5}
+.vm-map-loading{position:absolute;inset:0;display:grid;place-items:center;align-content:center;gap:10px;color:#8CA3C3;font-size:13px;background:#0C1424}
+.vm-map-loading i{width:26px;height:26px;border:3px solid #22304F;border-top-color:#2DD4BF;border-radius:50%;animation:vmSpin 0.9s linear infinite}
+@keyframes vmSpin{to{transform:rotate(360deg)}}
+.vm-map-loading span{font-size:11px;color:#5A6E8E}
+.vm-map-fail{position:absolute;inset:0;display:grid;place-items:center;color:#F5A623;font-size:13px;text-align:center;padding:30px;line-height:1.8}
+.vm-map .leaflet-popup-content-wrapper{background:#0F1930;color:#C7D5EC;border:1px solid #2A3A5C;border-radius:10px}
+.vm-map .leaflet-popup-tip{background:#0F1930;border:1px solid #2A3A5C}
+.vm-map .leaflet-popup-content b{color:#2DD4BF}
+.vm-map .leaflet-container{background:#0C1424;font-family:'Noto Sans SC',sans-serif}
+.vm-map .leaflet-control-zoom a{background:#0F1930;color:#C7D5EC;border:1px solid #22304F}
+.vm-map .leaflet-control-zoom a:hover{background:#16233E;color:#2DD4BF}
+.vm-map .leaflet-control-attribution{background:rgba(11,18,32,.7);color:#5A6E8E;font-size:9px}
+/* 地图源配置条 */
+.vm-map-bar{display:flex;align-items:center;gap:12px;padding:10px 16px;background:#0F1930;border:1px solid #1E2B48;border-radius:11px;margin-bottom:12px;flex-wrap:wrap}
+.mb-src{font-size:12px;color:#8CA3C3;display:inline-flex;align-items:center;gap:7px}
+.mb-src b{color:#2DD4BF}
+.vm-map-bar .vm-btn{margin-left:auto}
+/* 高德标记 */
+.amap-mk{width:24px;height:24px;border-radius:50% 50% 50% 4px;color:#fff;font-size:11px;font-weight:800;display:grid;place-items:center;border:2px solid #fff;box-shadow:0 2px 8px rgba(0,0,0,.4);transform:rotate(-45deg)}
+.amap-mk.dep{background:#8CA3C3;transform:none;border-radius:50%}
+/* 车辆实时位置标记 */
+.veh-ic{background:transparent;border:none}
+.veh-mk{width:30px;height:30px;border-radius:9px 9px 9px 2px;display:grid;place-items:center;font-size:9px;font-weight:900;color:#fff;letter-spacing:.3px;border:2px solid #fff;box-shadow:0 3px 12px rgba(0,0,0,.55);animation:vehPulse 1.8s ease-in-out infinite}
+.veh-mk .veh-st{position:absolute;right:-3px;top:-3px;width:10px;height:10px;border-radius:50%;border:2px solid #0B1220;box-shadow:0 0 6px rgba(0,0,0,.6)}
+@keyframes vehPulse{0%,100%{box-shadow:0 3px 12px rgba(0,0,0,.55)}50%{box-shadow:0 3px 20px rgba(45,212,191,.85)}}
+.amap-inf{font-family:'Noto Sans SC',sans-serif;font-size:12px;color:#334;line-height:1.7}
+.amap-inf b{color:#1F6B4F}
+.amap-inf span{display:block;color:#667}
+.amap-container{background:#0C1424}
+.vm-map .amap-logo,.vm-map .amap-copyright{opacity:.6}
+/* 坐标点选 */
+.vm-coord-row{display:flex;gap:8px;align-items:center}
+.vm-coord-row input{flex:1 1 auto}
+.vm-pick-map{height:300px;border-radius:11px;margin:6px 0 10px}
+.vm-pick-tip{font-size:12px;color:#8CA3C3;background:#0C1424;border:1px dashed #2A3A5C;border-radius:9px;padding:9px 12px;margin-bottom:12px;line-height:1.6}
+.vm-cfg-tip{font-size:12px;color:#9DB1D0;line-height:1.8;background:#0C1424;border:1px solid #1E2B48;border-radius:9px;padding:10px 12px}
+.vm-cfg-tip b{color:#2DD4BF}
+.vm-cfg-steps{font-size:11px;color:#8CA3C3;line-height:1.8;background:#0C1424;border:1px dashed #2A3A5C;border-radius:9px;padding:10px 12px}
+.vm-cfg-steps b{color:#7FA8E8;display:block;margin-bottom:3px}
+.vm-cfg-opts{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin:4px 0 2px}
+.vm-cfg-opt{background:#0C1424;border:1px solid #1E2B48;border-radius:11px;padding:14px 10px;cursor:pointer;display:flex;flex-direction:column;gap:5px;text-align:left;transition:all .15s}
+.vm-cfg-opt b{font-size:13px;color:#E7EDF7;font-weight:700}
+.vm-cfg-opt span{font-size:10.5px;color:#5A6E8E;line-height:1.5}
+.vm-cfg-opt:hover{border-color:#2A3A5C;background:#0F1930}
+.vm-cfg-opt.is-sel{border-color:#2DD4BF;background:rgba(45,212,191,.08);box-shadow:0 0 0 1px #2DD4BF inset}
+.vm-cfg-opt.is-sel b{color:#2DD4BF}
+/* 数据报表 */
+.vm-report{display:flex;flex-direction:column;gap:14px}
+.rp-kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+.rp-kpi{background:#0F1930;border:1px solid #1E2B48;border-radius:12px;padding:15px 16px}
+.rp-kpi .rk-v{font-size:21px;font-weight:900;color:#E6EDF7;letter-spacing:.3px}
+.rp-kpi .rk-v.good{color:#2DD4BF}
+.rp-kpi .rk-v.warn{color:#F5A623}
+.rp-kpi .rk-k{font-size:11px;color:#6E84A8;margin-top:6px}
+.rp-lines{display:flex;flex-direction:column;gap:14px;padding:16px 18px}
+.rp-lh{display:flex;align-items:center;gap:9px;margin-bottom:9px;flex-wrap:wrap}
+.rp-lh b{font-size:13px;color:#E6EDF7}
+.rp-rdot{width:10px;height:10px;border-radius:50%;display:inline-block}
+.rp-bars{display:flex;flex-direction:column;gap:8px}
+.rp-bar{display:flex;align-items:center;gap:10px;font-size:11px}
+.rp-bk{width:92px;color:#8CA3C3;flex:0 0 auto}
+.rp-bt{flex:1 1 auto;height:8px;background:#141F38;border-radius:99px;overflow:hidden}
+.rp-bt i{display:block;height:100%;background:linear-gradient(90deg,#4F8BFF,#7FA8E8);border-radius:99px}
+.rp-bt.good i{background:linear-gradient(90deg,#17B8A6,#2DD4BF)}
+.rp-bar b{width:76px;text-align:right;color:#C7D5EC;font-family:'JetBrains Mono',Consolas,monospace}
+.rp-days{display:flex;align-items:flex-end;justify-content:space-between;gap:10px;padding:18px 18px 12px;min-height:180px}
+.rp-day{flex:1 1 0;display:flex;flex-direction:column;align-items:center;gap:6px;height:150px;justify-content:flex-end}
+.rp-dv{font-size:11px;color:#C7D5EC;font-family:'JetBrains Mono',Consolas,monospace}
+.rp-dcol{width:100%;max-width:44px;height:110px;display:flex;align-items:flex-end;background:#0C1424;border-radius:7px;overflow:hidden}
+.rp-dcol i{display:block;width:100%;background:linear-gradient(180deg,#2DD4BF,#17B8A6);border-radius:7px 7px 0 0}
+.rp-day span{font-size:10px;color:#6E84A8}
+.rp-row{display:flex;align-items:center;gap:12px;padding:10px 18px;border-bottom:1px solid #16233E;font-size:12px}
+.rp-row:last-child{border-bottom:none}
+.rp-rn{width:130px;color:#C7D5EC;flex:0 0 auto}
+.rp-rt{flex:1 1 auto;height:9px;background:#141F38;border-radius:99px;overflow:hidden}
+.rp-rt i{display:block;height:100%;background:linear-gradient(90deg,#F5A623,#FFC46B);border-radius:99px}
+.rp-rt.good i{background:linear-gradient(90deg,#2DD4BF,#3EE0CC)}
+.rp-row b{width:70px;text-align:right;color:#E6EDF7;font-family:'JetBrains Mono',Consolas,monospace}
+
+/* ============================================================
+   响应式 · 手机 / 平板自适应
+   ============================================================ */
+@media (max-width:1180px){
+  .shell{min-width:0}
+  .switcher__hint{display:none}
+}
+@media (max-width:960px){
+  .login{padding:16px}
+  .login__card{padding:28px 22px 24px}
+  .login__roles{grid-template-columns:1fr;gap:10px}
+  .login__role{flex-direction:row;align-items:center;padding:14px 14px}
+  .lr-desc{min-height:0;flex:1 1 auto}
+  .lr-tags{margin-left:auto;flex:0 0 auto;max-width:46%}
+  /* B 版侧栏折叠为顶部横向导航 */
+  .vb-layout{flex-direction:column}
+  .vb-nav{width:auto;flex-direction:row;overflow-x:auto;padding:10px 12px;border-right:none;border-bottom:1px solid #E5E7E0;align-items:center;gap:4px}
+  .vb-brand{padding:0 8px 0 4px;border-bottom:none;margin-bottom:0;border-right:1px solid #EDEFE9;flex:0 0 auto}
+  .vb-nav .vb-foot{display:none}
+  .vb-navitem{white-space:nowrap;flex:0 0 auto}
+  .vb-kpis{grid-template-columns:repeat(2,1fr)}
+}
+@media (max-width:760px){
+  body{font-size:14px}
+  /* 顶部 */
+  .switcher{padding:9px 12px;gap:10px;flex-wrap:wrap}
+  .switcher__brand .switcher__sub{display:none}
+  .switcher__tabs{margin-left:0;order:3;width:100%;flex:1 1 100%;justify-content:space-between}
+  .switcher__tab{flex:1 1 0;justify-content:center;padding:8px 6px;font-size:12px}
+  /* A 版 */
+  .va-top{padding:12px 14px;flex-wrap:wrap;gap:10px}
+  .va-vehicle{margin-left:0;order:3;width:100%;justify-content:space-around}
+  .va-countdown{margin-left:auto}
+  .va-body{grid-template-columns:1fr;display:flex;flex-direction:column}
+  .va-track{order:1;border-right:none;border-bottom:1px solid #1B2640;padding:14px 14px}
+  .va-rail{flex-direction:column;align-items:stretch}
+  .va-rail::before{display:none}
+  .va-stop{min-width:0}
+  .va-side{order:2;flex:1 1 auto;display:flex;flex-direction:column}
+  .va-detail{padding:14px 14px}
+  .va-summary{max-height:none}
+  .va-metrics{grid-template-columns:repeat(2,1fr)}
+  .va-manifest .vm-grid{grid-template-columns:repeat(6,1fr)}
+  /* B 版 */
+  .vb-main{padding:14px 12px}
+  .vb-head{flex-direction:column;gap:10px}
+  .vb-head .vb-date{margin-left:0;align-self:flex-start}
+  .vb-kpis{grid-template-columns:repeat(2,1fr);gap:10px}
+  .vb-table{overflow-x:auto}
+  .vb-table table{min-width:640px}
+  /* C 版 */
+  .vc-top{flex-direction:column;align-items:stretch;gap:12px}
+  .vc-shift{justify-content:space-around}
+  .vc-body{flex-direction:column;display:flex}
+  .vc-list{order:2;border-right:none;border-top:1px solid #1D262E;max-height:none}
+  .vc-ops{order:1}
+  .vo-steps{overflow-x:auto;padding-bottom:4px}
+  /* 登录 */
+  .login__brand h1{font-size:21px}
+  /* M 运营管理 */
+  .vm-top{padding:10px 12px}
+  .vm-meta{width:100%;margin-left:0;order:3;flex-wrap:wrap}
+  .vm-body{padding:12px}
+  .vm-table{overflow-x:auto}
+  .vm-table table{min-width:560px}
+  .vm-stop{flex-wrap:wrap}
+  .vm-stop .vs-ops{width:100%;justify-content:flex-end}
+  .vm-map-wrap{min-height:340px}
+  .vm-map-tip{display:none}
+  .rp-kpis{grid-template-columns:repeat(2,1fr);gap:10px}
+  .rp-bk{width:70px}
+  .rp-bar b{width:60px}
+  .rp-rn{width:96px}
+  .vm-map-bar .vm-btn{margin-left:0}
+}
+@media (max-width:520px){
+  .login__card{padding:24px 16px 20px}
+  .login__role{flex-wrap:wrap}
+  .lr-tags{max-width:100%;margin-left:0}
+  .lr-desc{flex:1 1 100%;min-height:0}
+  .switcher__exit{font-size:11px;padding:7px 10px}
+  .va-metrics{grid-template-columns:1fr 1fr}
+  .vb-kpis{grid-template-columns:1fr 1fr;gap:8px}
+  .vb-kpi .k-num{font-size:20px}
+  .va-vehicle .vv-cell{padding:0 5px}
+}
+/* ============================================================
+   UI 视觉升级 —— 图标鲜活化 & 质感增强
+   ============================================================ */
+@keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+@keyframes floaty{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
+@keyframes glowRing{0%,100%{box-shadow:0 0 0 0 rgba(45,212,191,.45)}50%{box-shadow:0 0 0 8px rgba(45,212,191,0)}}
+/* 品牌 Logo 图（无人车+卸货主题） */
+.switcher__logo,.login__logo{background-image:url('data:image/jpeg;base64,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');background-size:cover;background-position:center;box-shadow:0 4px 14px -4px rgba(45,212,191,.55)}
+.switcher__logo{animation:glowRing 2.6s ease-in-out infinite}
+.login__logo{width:78px;height:78px;border-radius:21px;animation:floaty 4s ease-in-out infinite;box-shadow:0 12px 30px -8px rgba(45,212,191,.55)}
+.login__card{animation:fadeUp .45s ease}
+/* 登录页角色卡图标 */
+.login__role{position:relative;overflow:hidden}
+.login__role::before{content:"";position:absolute;inset:0;background:radial-gradient(130px 100px at 88% -12%,rgba(45,212,191,.16),transparent 70%);opacity:0;transition:.25s}
+.login__role:hover::before{opacity:1}
+.lr-ic{width:48px;height:48px;border-radius:14px;font-size:0;display:grid;place-items:center;transition:transform .22s,box-shadow .22s}
+.lr-ic svg{width:26px;height:26px;stroke-width:1.5}
+.login__role:hover .lr-ic{transform:scale(1.08) rotate(-3deg);box-shadow:0 8px 20px -8px rgba(0,0,0,.5)}
+.lr-tags i{transition:.15s}
+.login__role:hover .lr-tags i{border-color:#2DD4BF;color:#2DD4BF;background:rgba(45,212,191,.08)}
+/* 顶栏 */
+.switcher{background:linear-gradient(90deg,#0C1322,#101B33)}
+.switcher__tab .sw-dot{width:8px;height:8px;transition:.18s}
+.switcher__tab .sw-ic{display:grid;place-items:center;transition:transform .18s}
+.switcher__tab .sw-ic svg{width:15px;height:15px}
+.switcher__tab:hover .sw-ic{transform:scale(1.15)}
+.switcher__tab.is-active .sw-ic{color:#07251F}
+.switcher__tab.is-active{box-shadow:0 6px 18px -8px rgba(45,212,191,.65)}
+.switcher__brand:hover .switcher__logo{transform:rotate(4deg)}
+.switcher__logo{transition:transform .25s}
+/* 版本条 */
+.ver-banner .bn-tag{display:inline-flex;align-items:center;gap:5px}
+.bn-tag svg{width:12px;height:12px;stroke-width:1.8}
+/* 图标悬停动效 */
+.vm-nav svg,.vm-btn svg,.btn svg,.vc-bigbtn svg,.vg-btn svg,.vb-btn svg,.bill svg,.vm-cfg-opt svg,.f-submit svg,.an-btn svg{transition:transform .18s}
+.vm-nav:hover svg,.vm-btn:hover svg,.btn:hover svg,.vc-bigbtn:hover svg,.vg-btn:hover svg,.vb-btn:hover svg,.bill:hover svg,.vm-cfg-opt:hover svg,.f-submit:hover svg,.an-btn:hover svg{transform:scale(1.18)}
+/* 卡片质感 */
+.vm-card,.va-stop,.vc-task,.vd-cell,.person-card,.vo-panel,.vb-kpi,.vb-kpi,.bind-row,.va-alert{transition:transform .18s,box-shadow .18s,border-color .18s}
+.vm-card:hover,.vo-panel:hover,.vb-kpi:hover,.bind-row:hover{transform:translateY(-2px);box-shadow:0 14px 30px -16px rgba(0,0,0,.6)}
+.va-stop:hover,.vc-task:hover,.vd-cell:hover,.person-card:hover{box-shadow:0 12px 26px -14px rgba(0,0,0,.6)}
+/* 状态徽标质感 */
+.status-pill{display:inline-flex;align-items:center;gap:5px}
+.sp-dot{box-shadow:0 0 0 3px rgba(255,255,255,.28)}
+/* 统计数字高亮 */
+.rp-kpi,.sh-cell,.vc-shift .sh-cell{position:relative;overflow:hidden}
+.rp-kpi::after,.sh-cell::after{content:"";position:absolute;top:-40%;right:-40%;width:70%;height:120%;background:radial-gradient(circle,rgba(45,212,191,.12),transparent 65%);pointer-events:none}
+/* 地图图例/bar 微光 */
+.veh-mk{box-shadow:0 3px 12px rgba(0,0,0,.55),0 0 0 1px rgba(255,255,255,.25)}
+</style>
+</head>
+<body>
+<div class="shell" id="shell">
+  <header class="switcher">
+    <div class="switcher__brand">
+      <div class="switcher__logo" id="swLogo"></div>
+      <div>
+        <div class="switcher__title">无人车卸货履约平台</div>
+        <div class="switcher__sub">B端配送 · 人车接力 · 确定性卸货</div>
+      </div>
+    </div>
+    <nav class="switcher__tabs" id="verTabs">
+      <button class="switcher__tab is-active" data-v="a"><span class="sw-dot"></span>A · 调度舱</button>
+      <button class="switcher__tab" data-v="b"><span class="sw-dot"></span>B · 企业工作台</button>
+      <button class="switcher__tab" data-v="c"><span class="sw-dot"></span>C · 履约现场</button>
+      <button class="switcher__tab" data-v="m"><span class="sw-dot"></span>M · 运营管理</button>
+    </nav>
+    <div class="switcher__hint" id="verHint">平台调度运营视角 · 深色控制台，全链路监控确认状态</div>
+    <button class="switcher__exit" id="btnExit">切换角色</button>
+  </header>
+
+  <main class="ver ver-a is-active" id="verA" data-ver="a"></main>
+  <main class="ver ver-b" id="verB" data-ver="b"></main>
+  <main class="ver ver-c" id="verC" data-ver="c"></main>
+  <main class="ver ver-m" id="verM" data-ver="m"></main>
+</div>
+
+<!-- 登录 / 角色选择 -->
+<div class="login" id="loginScreen">
+  <div class="login__card">
+    <div class="login__logo" id="lgLogo"></div>
+    <div class="login__brand">
+      <h1>无人车卸货履约平台</h1>
+      <p>B端配送 · 人车接力 · 确定性卸货</p>
+    </div>
+    <div class="login__desc">无人车到站后由绑定责任人完成卸货签收，覆盖派单、确认、结算全链路。选择身份进入对应工作台：</div>
+    <div class="login__roles">
+      <button class="login__role" data-role="a">
+        <span class="lr-ic lr-a"></span>
+        <span class="lr-name">调度运营台</span>
+        <span class="lr-desc">平台运营视角 · 监控停靠点确认状态、异常外溢与车辆到站时序</span>
+        <span class="lr-tags"><i>到站时序</i><i>主责锁定</i><i>外溢广播</i><i>SLA 赔付</i></span>
+      </button>
+      <button class="login__role" data-role="b">
+        <span class="lr-ic lr-b"></span>
+        <span class="lr-name">货主企业台</span>
+        <span class="lr-desc">货主视角 · 配送任务、责任人确认、卸货结算与账单一屏管理</span>
+        <span class="lr-tags"><i>新建任务</i><i>责任人管理</i><i>费用结算</i><i>确认规则</i></span>
+      </button>
+      <button class="login__role" data-role="c">
+        <span class="lr-ic lr-c"></span>
+        <span class="lr-name">责任人履约台</span>
+        <span class="lr-desc">一线责任人视角 · 确认接单、扫码开箱、卸货签收、收入入账全流程</span>
+        <span class="lr-tags"><i>确认接单</i><i>扫码开箱</i><i>异常上报</i><i>收入明细</i></span>
+      </button>
+      <button class="login__role" data-role="m">
+        <span class="lr-ic lr-m"></span>
+        <span class="lr-name">运营管理台</span>
+        <span class="lr-desc">平台配置视角 · 车辆、线路、人员与站点的增删改查，地图总览一屏掌控</span>
+        <span class="lr-tags"><i>车辆管理</i><i>线路管理</i><i>人员管理</i><i>地图总览</i></span>
+      </button>
+    </div>
+    <button class="login__demo" id="btnDemo">进入演示模式 · 三版自由切换</button>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+/* ============================================================
+   共享数据层
+   ============================================================ */
+const ROUTES = [
+  {id:'R1', name:'北城线', depart:'观山湖分拣仓', etd:'05:30', stops:[
+    {id:'S1', name:'观山湖万达店', area:'观山湖区', eta:'06:05', items:42, weightKg:520, kind:'生鲜 · 日配', slots:['G3','G4','G5'], estMin:18, note:'含低温生鲜 12 件，到货后优先入冷库',
+      main:{name:'陈师傅', role:'门店收货员', confirmed:true, score:4.9, phone:'138****6621'},
+      backup:[{name:'王师傅', role:'片区驻点', confirmed:true, score:4.7}], status:'ready',
+      history:[{t:'21:08', act:'主责陈师傅一键确认明早班次'},{t:'21:09', act:'备选王师傅确认到位'},{t:'22:00', act:'平台锁定绑定，确认闭环'}],
+      issues:[]},
+    {id:'S2', name:'会展城店', area:'观山湖区', eta:'06:35', items:28, weightKg:340, kind:'生鲜', slots:['G6'], estMin:12, note:'',
+      main:{name:'李姐', role:'门店员工', confirmed:false, score:4.6, phone:'139****0188'},
+      backup:[{name:'周师傅', role:'片区驻点', confirmed:false, score:4.5}], status:'escalated',
+      history:[{t:'21:04', act:'系统发送确认单至主责李姐'},{t:'21:30', act:'未响应，自动升级备选周师傅'},{t:'21:52', act:'备选仍在确认中，临近截止'}],
+      issues:[]},
+    {id:'S3', name:'高新区工业园', area:'高新区', eta:'07:10', items:36, weightKg:610, kind:'日配 · 饮料', slots:['G7','G8','G9','G10'], estMin:20, note:'重货占比高，建议双人协同',
+      main:null, backup:[], status:'broadcast',
+      history:[{t:'21:12', act:'主责报备休假，进入备选流程'},{t:'21:40', act:'备选池无人响应，触发外溢广播'},{t:'21:45', act:'已推送观山湖片区零工池 18 人'}],
+      issues:[{t:'08:12', type:'货损', desc:'饮料整箱压损 1 件', status:'处理中'}]},
+    {id:'S4', name:'金阳医院便利店', area:'观山湖区', eta:'07:40', items:12, weightKg:90, kind:'冷链', slots:['G11'], estMin:8, note:'冷链 2-8℃，需 10 分钟内交接',
+      main:{name:'小杨', role:'门店员工', confirmed:true, score:4.8, phone:'136****4302'},
+      backup:[{name:'赵师傅', role:'兼职', confirmed:true, score:4.4}], status:'ready',
+      history:[{t:'21:10', act:'主责小杨确认'},{t:'21:11', act:'备选赵师傅确认'}],
+      issues:[]}
+  ]},
+  {id:'R2', name:'南城线', depart:'观山湖分拣仓', etd:'05:50', stops:[
+    {id:'S5', name:'花果园店', area:'南明区', eta:'06:15', items:55, weightKg:680, kind:'生鲜 · 日配', slots:['G3','G4','G5','G6'], estMin:22, note:'本日货量较大，已启用备选驻点协同',
+      main:{name:'何师傅', role:'门店收货员', confirmed:true, score:4.9, phone:'137****7765'},
+      backup:[{name:'孙师傅', role:'片区驻点', confirmed:false, score:4.6}], status:'partial',
+      history:[{t:'21:06', act:'主责何师傅确认'},{t:'21:33', act:'备选孙师傅未确认，提醒一次'}],
+      issues:[]},
+    {id:'S6', name:'太慈桥店', area:'南明区', eta:'06:50', items:31, weightKg:400, kind:'生鲜', slots:['G7','G8'], estMin:14, note:'',
+      main:{name:'吴姐', role:'门店员工', confirmed:true, score:4.7, phone:'135****9923'},
+      backup:[{name:'刘师傅', role:'兼职', confirmed:true, score:4.5}], status:'ready',
+      history:[{t:'21:07', act:'主责吴姐确认'},{t:'21:08', act:'备选刘师傅确认'}],
+      issues:[]},
+    {id:'S7', name:'青云路市集', area:'南明区', eta:'07:20', items:48, weightKg:700, kind:'批发 · 日配', slots:['G9','G10','G11'], estMin:20, note:'批发档口，需在早市开市前卸完',
+      main:null, backup:[], status:'broadcast',
+      history:[{t:'21:15', act:'无固定责任人，进入外溢'},{t:'21:48', act:'已推送南明片区零工池'}],
+      issues:[]},
+    {id:'S8', name:'南明工业园', area:'南明区', eta:'07:55', items:26, weightKg:460, kind:'日配', slots:['G12'], estMin:12, note:'',
+      main:{name:'郑师傅', role:'门店员工', confirmed:false, score:4.5, phone:'133****6678'},
+      backup:[{name:'黄师傅', role:'片区驻点', confirmed:true, score:4.8}], status:'escalated',
+      history:[{t:'21:05', act:'主责郑师傅未确认'},{t:'21:35', act:'升级备选黄师傅，已确认到位'}],
+      issues:[]}
+  ]},
+  {id:'R3', name:'大学城线', depart:'观山湖分拣仓', etd:'06:00', stops:[
+    {id:'S9', name:'贵州大学店', area:'花溪区', eta:'06:40', items:24, weightKg:280, kind:'生鲜', slots:['G3','G4'], estMin:10, note:'',
+      main:{name:'罗师傅', role:'门店收货员', confirmed:true, score:4.9, phone:'134****1109'},
+      backup:[{name:'彭师傅', role:'兼职', confirmed:true, score:4.3}], status:'ready',
+      history:[{t:'21:02', act:'主责罗师傅确认'},{t:'21:03', act:'备选彭师傅确认'}],
+      issues:[]},
+    {id:'S10', name:'新浦大学城店', area:'新浦新区', eta:'07:15', items:39, weightKg:480, kind:'日配 · 饮料', slots:['G5','G6','G7'], estMin:16, note:'',
+      main:{name:'代师傅', role:'门店员工', confirmed:false, score:4.6, phone:'132****5590'},
+      backup:[{name:'莫师傅', role:'片区驻点', confirmed:false, score:4.5}], status:'escalated',
+      history:[{t:'21:09', act:'主责代师傅未确认'},{t:'21:41', act:'升级备选莫师傅，确认中'}],
+      issues:[]}
+  ]}
+];
+
+/* 站点坐标（贵阳真实大致位置，用于地图总览；新增站点可在地图表单中填写） */
+const COORDS = {
+  '观山湖分拣仓':[26.615,106.612],
+  S1:[26.608,106.624], S2:[26.636,106.651], S3:[26.685,106.608], S4:[26.627,106.598],
+  S5:[26.560,106.683], S6:[26.547,106.667], S7:[26.566,106.711], S8:[26.517,106.736],
+  S9:[26.443,106.665], S10:[26.472,106.708]
+};
+function coordOf(s){ return (s&&s.lat&&s.lng)?[s.lat,s.lng]:(COORDS[s.id]||COORDS[s.name]||[26.60,106.65]); }
+
+let VEHICLES = {
+  R1:{id:'V01', plate:'贵A·D2067', model:'新石器 X3', battery:78, loadRate:0.86, status:'在运', driver:'无人·远程接管'},
+  R2:{id:'V02', plate:'贵A·D2091', model:'新石器 X3', battery:64, loadRate:0.82, status:'在运', driver:'无人·远程接管'},
+  R3:{id:'V03', plate:'贵A·D2115', model:'九识 Z5', battery:91, loadRate:0.61, status:'待命', driver:'无人·远程接管'}
+};
+
+const STATUS = {
+  ready:    {label:'已就绪',      tone:'good', desc:'主责与备选均已确认', dot:'#2DD4BF'},
+  partial:  {label:'备选待确认',  tone:'warn', desc:'主责已确认，备选尚未确认', dot:'#F5A623'},
+  escalated:{label:'升级确认中',  tone:'warn', desc:'主责未确认，系统正在联系备选', dot:'#F5A623'},
+  broadcast:{label:'已外溢广播',  tone:'bad',  desc:'无人绑定，已推送周边零工池', dot:'#F87171'}
+};
+
+/* 卸货服务费计价：基础 30 + 件数×0.5 + 重量附加(>500kg +12 / >300kg +6) + 冷链附加 5 */
+function unloadFee(s){
+  const heavy = s.weightKg>500 ? 12 : (s.weightKg>300 ? 6 : 0);
+  const cold = s.kind.includes('冷链') ? 5 : 0;
+  return Math.round(30 + s.items*0.5 + heavy + cold);
+}
+const CUT = 0.15;
+
+const progress = {S1:'done', S2:'pending', S3:'pending', S4:'pending', S5:'pending', S6:'pending', S7:'pending', S8:'pending', S9:'unloading', S10:'pending'};
+const PROGRESS_LABEL = {pending:'待到场', arrived:'已到场', unloading:'卸货中', done:'已完成'};
+const PROGRESS_DOT   = {pending:'#6C7E8C', arrived:'#F5A623', unloading:'#2DD4BF', done:'#34D399'};
+
+const MINE = [
+  {stopId:'S1', role:'主责', note:'门店收货员'},
+  {stopId:'S5', role:'备选', note:'片区驻点 · 已启用'},
+  {stopId:'S9', role:'主责', note:'门店收货员'}
+];
+const DEMO_MINE = JSON.parse(JSON.stringify(MINE));
+const WORKER = {name:'陈师傅', score:4.9, streak:26, phone:'138****6621', role:'门店收货员', area:'观山湖片区'};
+const MY_BILLS = [
+  {d:'08-20', s:'观山湖万达店', a:53.55, st:'已到账'},
+  {d:'08-21', s:'花果园店（备选）', a:59.50, st:'已到账'},
+  {d:'08-22', s:'观山湖万达店', a:53.55, st:'已到账'},
+  {d:'08-23', s:'贵州大学店', a:35.70, st:'已到账'},
+  {d:'08-24', s:'观山湖万达店', a:53.55, st:'已到账'},
+  {d:'08-25', s:'太慈桥店（备选）', a:44.20, st:'已到账'}
+];
+
+let STAFF = [
+  {id:'P01', name:'陈师傅', role:'门店收货员', station:'观山湖万达店', score:4.9, ok:98, state:'在岗'},
+  {id:'P02', name:'李姐', role:'门店员工', station:'会展城店', score:4.6, ok:94, state:'待确认'},
+  {id:'P03', name:'小杨', role:'门店员工', station:'金阳医院便利店', score:4.8, ok:97, state:'在岗'},
+  {id:'P04', name:'何师傅', role:'门店收货员', station:'花果园店', score:4.9, ok:99, state:'在岗'},
+  {id:'P05', name:'吴姐', role:'门店员工', station:'太慈桥店', score:4.7, ok:95, state:'在岗'},
+  {id:'P06', name:'郑师傅', role:'门店员工', station:'南明工业园', score:4.5, ok:91, state:'待确认'},
+  {id:'P07', name:'罗师傅', role:'门店收货员', station:'贵州大学店', score:4.9, ok:98, state:'在岗'},
+  {id:'P08', name:'代师傅', role:'门店员工', station:'新浦大学城店', score:4.6, ok:93, state:'待确认'},
+  {id:'P09', name:'赵师傅', role:'兼职', station:'片区驻点池', score:4.4, ok:88, state:'备选'},
+  {id:'P10', name:'莫师傅', role:'片区驻点', station:'片区驻点池', score:4.5, ok:90, state:'备选'}
+];
+
+const state = {
+  ver:'a', route:'R1', selStop:'S1',
+  bNav:'deliver', bFilter:'all', bDrawer:null, bSettleLine:'all', bSettleState:'all',
+  selMine:'S1', cIssueOpen:false,
+  mNav:'map'
+};
+let seq = 100;
+
+/* ============================================================
+   工具
+   ============================================================ */
+const $ = s => document.querySelector(s);
+function stopById(id){ for(const r of ROUTES){ const s=r.stops.find(x=>x.id===id); if(s) return s; } return null; }
+function allStops(){ return ROUTES.flatMap(r=>r.stops); }
+function nowTag(){ const d=new Date(); const h=String(d.getHours()).padStart(2,'0'); const m=String(d.getMinutes()).padStart(2,'0'); return h+':'+m; }
+function cnDate(){ const d=new Date(); const w=['周日','周一','周二','周三','周四','周五','周六'][d.getDay()]; const mm=String(d.getMonth()+1).padStart(2,'0'); const dd=String(d.getDate()).padStart(2,'0'); return d.getFullYear()+'-'+mm+'-'+dd+' '+w; }
+function addLog(s, act){ s.history.unshift({t:nowTag(), act:act}); if(s.history.length>5) s.history.pop(); }
+/* 重置演示：恢复站点绑定状态、进度与责任人任务（含抢单） */
+function restoreDemoBinding(){
+  if(typeof DEMO_ROUTES==='undefined') return;
+  DEMO_ROUTES.forEach(r=>r.stops.forEach(ds=>{
+    const s=allStops().find(x=>x.id===ds.id);
+    if(s){ s.main=JSON.parse(JSON.stringify(ds.main)); s.backup=JSON.parse(JSON.stringify(ds.backup)); s.status=ds.status; s.history=JSON.parse(JSON.stringify(ds.history)); s.issues=JSON.parse(JSON.stringify(ds.issues||[])); }
+  }));
+}
+function resetProgressDefault(){
+  Object.keys(progress).forEach(k=>delete progress[k]);
+  const def={S1:'done',S2:'pending',S3:'pending',S4:'pending',S5:'pending',S6:'pending',S7:'pending',S8:'pending',S9:'unloading',S10:'pending'};
+  Object.keys(def).forEach(k=>progress[k]=def[k]);
+  if(typeof DEMO_MINE!=='undefined'){ MINE.length=0; MINE.push.apply(MINE, JSON.parse(JSON.stringify(DEMO_MINE))); }
+}
+
+/* ============ 本地持久化：刷新不丢数据 ============ */
+const LS_KEY='unload_platform_v1';
+function persist(){
+  try{ localStorage.setItem(LS_KEY, JSON.stringify({ROUTES, VEHICLES, STAFF, progress, state, seq, MINE})); }catch(e){}
+}
+function loadPersist(){
+  try{
+    const raw=localStorage.getItem(LS_KEY); if(!raw) return false;
+    const d=JSON.parse(raw);
+    if(d.ROUTES){ ROUTES.length=0; ROUTES.push.apply(ROUTES, d.ROUTES); }
+    if(d.VEHICLES){ Object.keys(VEHICLES).forEach(k=>delete VEHICLES[k]); Object.assign(VEHICLES, d.VEHICLES); }
+    if(d.STAFF){ STAFF.length=0; STAFF.push.apply(STAFF, d.STAFF); }
+    if(d.MINE){ MINE.length=0; MINE.push.apply(MINE, d.MINE); }
+    if(d.progress) Object.assign(progress, d.progress);
+    if(d.state) Object.assign(state, d.state);
+    if(typeof d.seq==='number') seq=d.seq;
+    return true;
+  }catch(e){ return false; }
+}
+
+const ICONS = {
+  truck:'<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 6.5h10.5v10H2.5z"/><path d="M13 10h4.2L20 13v3.5h-7z"/><circle cx="7" cy="17.5" r="1.9" fill="currentColor" stroke="none"/><circle cx="16.5" cy="17.5" r="1.9" fill="currentColor" stroke="none"/><path d="M2.5 9.5h10.5"/></svg>',
+  pin:'<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21.5s-6.8-5.5-6.8-10.4a6.8 6.8 0 0 1 13.6 0C18.8 16 12 21.5 12 21.5z"/><circle cx="12" cy="10.8" r="2.6" fill="currentColor" stroke="none"/><circle cx="12" cy="10.8" r="1" fill="#fff" stroke="none"/></svg>',
+  user:'<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="7.8" r="3.8"/><path d="M4.5 20.5c1.3-3.6 4.2-5.3 7.5-5.3s6.2 1.7 7.5 5.3"/></svg>',
+  clock:'<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.6"/><path d="M12 7v5.2l3.2 1.9"/></svg>',
+  box:'<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 7.5 12 3l8.5 4.5v9L12 21l-8.5-4.5z"/><path d="M3.5 7.5 12 12l8.5-4.5"/><path d="M12 12v9"/></svg>',
+  check:'<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9" stroke-width="1.4" opacity=".35"/><path d="M6.5 12.5l3.6 3.6 7.4-8"/></svg>',
+  alert:'<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.6 21 20H3z"/><path d="M12 10v4.4"/><circle cx="12" cy="17.1" r=".7" fill="currentColor" stroke="none"/></svg>',
+  scan:'<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8V5.5A1.5 1.5 0 0 1 5.5 4H8M16 4h2.5A1.5 1.5 0 0 1 20 5.5V8M20 16v2.5a1.5 1.5 0 0 1-1.5 1.5H16M8 20H5.5A1.5 1.5 0 0 1 4 18.5V16"/><path d="M4 12h16"/><path d="M8 9v6M16 9v6" stroke-width="1.2" opacity=".6"/></svg>',
+  wallet:'<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="6" width="18" height="13" rx="2.2"/><path d="M3 10.5h18"/><circle cx="16.3" cy="14.6" r="1.3" fill="currentColor" stroke="none"/></svg>',
+  route:'<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="6" r="2.5" fill="currentColor" stroke="none"/><circle cx="18" cy="18" r="2.5" fill="currentColor" stroke="none"/><path d="M6 8.5v3.6a3.4 3.4 0 0 0 3.4 3.4H15"/></svg>',
+  gear:'<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 2.8v2.6M12 18.6v2.6M2.8 12h2.6M18.6 12h2.6M5.5 5.5l1.8 1.8M16.7 16.7l1.8 1.8M18.5 5.5l-1.8 1.8M7.3 16.7l-1.8 1.8"/></svg>',
+  bolt:'<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M13.2 2.6 4.6 13.4h6.4l-1 8 8.6-10.8h-6.4z"/></svg>',
+  layers:'<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 3 8l9 5 9-5z"/><path d="M3 13l9 5 9-5"/><path d="M3 17.6 12 22.6l9-5"/></svg>',
+  phone:'<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 4h4l1.5 4L8 9.5a12 12 0 0 0 6.5 6.5L16 13.5l4 1.5v4a2 2 0 0 1-2.2 2A17 17 0 0 1 3 6.2 2 2 0 0 1 5 4z"/></svg>',
+  star:'<svg viewBox="0 0 24 24" width="13" height="13" fill="currentColor" stroke="none"><path d="M12 2.8l2.7 5.6 6.2.9-4.5 4.3 1 6.2L12 16.9l-5.4 2.9 1-6.2L3.1 9.3l6.2-.9z"/></svg>',
+  plus:'<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>',
+  grid:'<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><rect x="4" y="4" width="6" height="6" rx="1.2"/><rect x="14" y="4" width="6" height="6" rx="1.2"/><rect x="4" y="14" width="6" height="6" rx="1.2"/><rect x="14" y="14" width="6" height="6" rx="1.2"/></svg>',
+  shield:'<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 5 6v6c0 4 3 7 7 9 4-2 7-5 7-9V6z"/><path d="M9.4 12l1.9 1.9 3.8-4.2"/></svg>',
+  doc:'<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h8l4 4v14H6z"/><path d="M14 3v4h4"/><path d="M9.5 12h5M9.5 15.5h5"/></svg>',
+  send:'<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12 20 4l-4 16-4-6-6-2z"/><path d="M12 14l4-6"/></svg>',
+  logout:'<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 4H5.5A1.5 1.5 0 0 0 4 5.5v13A1.5 1.5 0 0 0 5.5 20H9"/><path d="M15 8l4 4-4 4M9 12h10"/></svg>',
+  calendar:'<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16"/><path d="M8 3v4M16 3v4"/><path d="M8 14h3M8 17h5"/></svg>',
+  history:'<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12a8 8 0 1 1 2.3 5.6"/><path d="M4 12V6.5M4 12h5.5"/><path d="M12 8v4.2l2.8 1.7"/></svg>',
+  radar:'<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5.5" opacity=".55"/><circle cx="12" cy="12" r="2" opacity=".35"/><path d="M12 12l5-5" stroke-width="1.4"/><path d="M12 3.5V6"/></svg>',
+  store:'<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9.5 5.5 4h13L20 9.5"/><path d="M4 9.5V20h16V9.5"/><path d="M4 9.5a2.4 2.4 0 0 0 4.8 0 2.4 2.4 0 0 0 4.8 0 2.4 2.4 0 0 0 4.8 0"/><path d="M9.5 20v-5.5h5V20"/></svg>',
+  hand:'<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M7 11V6.5a1.8 1.8 0 0 1 3.6 0V11"/><path d="M10.6 11V5.4a1.8 1.8 0 0 1 3.6 0V11"/><path d="M14.2 11V6.2a1.8 1.8 0 0 1 3.6 0V13c0 4-2.6 7-6 7-3 0-5-2-5-5.4L7 12"/></svg>',
+  settings:'<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M10.5 3.5h3l.5 2.2 1.7.9 2.1-.9 1.5 2.6-1.4 1.7v1.8l1.4 1.7-1.5 2.6-2.1-.9-1.7.9-.5 2.2h-3l-.5-2.2-1.7-.9-2.1.9-1.5-2.6 1.4-1.7v-1.8L4.7 11l1.5-2.6 2.1.9 1.7-.9z"/><circle cx="12" cy="12" r="2.4"/></svg>',
+  bell:'<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9a6 6 0 0 1 12 0c0 4 1.5 5.5 1.5 5.5h-15S6 13 6 9z"/><path d="M10 19a2.2 2.2 0 0 0 4 0"/></svg>',
+  chart:'<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V10M10 20V4M16 20v-7M21 20H3"/></svg>',
+  qrcode:'<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="6" height="6" rx="1"/><rect x="14" y="4" width="6" height="6" rx="1"/><rect x="4" y="14" width="6" height="6" rx="1"/><path d="M14 14h2v2M20 14h.01M14 20h.01M20 20h.01M18 17h2v3"/></svg>',
+  map:'<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6l6-2.5 6 2.5 6-2.5v16l-6 2.5-6-2.5-6 2.5z"/><path d="M9 3.5v16M15 6v16"/></svg>',
+  boxCheck:'<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 7.5 12 3l8.5 4.5v9L12 21l-8.5-4.5z"/><path d="M3.5 7.5 12 12l8.5-4.5M12 12v9"/><path d="M8.5 12.2l2.3 2.3 4.4-5" stroke-width="1.4"/></svg>',
+  users:'<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.2"/><path d="M3.5 20c1-2.8 3-4.2 5.5-4.2s4.5 1.4 5.5 4.2"/><path d="M16 5.2a3.2 3.2 0 0 1 0 5.6M18.5 16c.8 1.3 1.4 2.5 1.9 4"/></svg>',
+  trend:'<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 17.5 10 11l4 4 6.5-7.5"/><path d="M15 7.5h5.5V13"/></svg>',
+  warehouse:'<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 9.5 12 4.5l8.5 5V20h-17z"/><path d="M3.5 20V9.5M20.5 20V9.5"/><path d="M8.5 20v-4h7v4"/></svg>'
+};
+
+function toast(msg){
+  const t = $('#toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(t._timer);
+  t._timer = setTimeout(()=>t.classList.remove('show'), 2600);
+}
+function esc(s){ return String(s).replace(/[&<>"]/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+function statusPill(s){
+  const m = STATUS[s];
+  const cls = 'st-'+(s==='partial'||s==='escalated'?'partial':s);
+  return '<span class="status-pill '+cls+'"><span class="sp-dot"></span>'+m.label+'</span>';
+}
+function slotChips(s, light){
+  const cls = light?' slot-chip light':'';
+  return (s.slots||[]).map(g=>'<span class="slot-chip'+cls+'">'+g+'</span>').join('');
+}
+function personCard(p, isMain){
+  return '<div class="person-card"><span class="pc-role '+(isMain?'main':'')+'">'+(isMain?'主责':'备选')+'</span>'
+    +'<div><div class="pc-name">'+esc(p.name)+'</div><div class="pc-meta">'+esc(p.role)+' · '+(p.phone||'')+'</div></div>'
+    +'<div class="pc-right"><div class="pc-score">'+ICONS.star+' '+p.score.toFixed(1)+'</div>'
+    +'<div class="pc-state">'+(p.confirmed?'已确认':'待确认')+'</div></div></div>';
+}
+function logRows(s, dark){
+  const cls = dark?'lg-row dark':'lg-row light';
+  return (s.history||[]).map(l=>'<div class="'+cls+'"><span class="lg-time">'+l.t+'</span><span class="lg-act">'+esc(l.act)+'</span></div>').join('');
+}
+
+/* ============================================================
+   版本 A —— 调度舱
+   ============================================================ */
+function countdownToDeadline(){
+  const now=new Date();
+  const dl=new Date(); dl.setHours(22,0,0,0);
+  if(dl<=now) dl.setDate(dl.getDate()+1);
+  let s=Math.floor((dl-now)/1000);
+  const h=String(Math.floor(s/3600)).padStart(2,'0');
+  const m=String(Math.floor(s%3600/60)).padStart(2,'0');
+  return h+':'+m;
+}
+let selStopCache = null;
+function renderA(){
+  const host = $('#verA');
+  const route = ROUTES.find(r=>r.id===state.route);
+  const veh = VEHICLES[route.id] || {id:'未分配', plate:'--', battery:0, loadRate:0, status:'--', model:''};
+  const stop = selStopCache || stopById(state.selStop) || route.stops[0];
+  selStopCache = stop;
+
+  const stopsHtml = route.stops.map((s,idx)=>{
+    const person = s.main
+      ? '<div class="vs-person"><span class="pf">'+ICONS.user+'</span><span>'+esc(s.main.name)+' · '+esc(s.main.role)+(s.main.confirmed?'':'（待确认）')+'</span></div>'
+      : '<div class="vs-person vs-none">'+ICONS.user+' 暂无绑定 · 等待外溢</div>';
+    return '<div class="va-stop'+(s.id===stop.id?' is-sel':'')+'" data-stop="'+s.id+'">'
+      +'<div class="vs-head"><span class="vs-eta">'+s.eta+'</span><span class="vs-seq">'+(idx+1)+'</span></div>'
+      +'<div class="vs-name">'+esc(s.name)+'</div>'
+      +'<div class="vs-area">'+esc(s.area)+' · '+esc(s.kind)+'</div>'
+      +'<div class="vs-load"><span>'+ICONS.box+s.items+' 件</span><span>'+ICONS.truck+s.weightKg+'kg</span>'
+      +'<span style="color:'+PROGRESS_DOT[progress[s.id]]+'">'+PROGRESS_LABEL[progress[s.id]]+'</span>'
+      +'<span>'+ICONS.clock+s.estMin+'min</span></div>'
+      +'<div class="vs-slots">'+slotChips(s)+'</div>'
+      +person+'</div>';
+  }).join('');
+
+  /* 装车清单：G1-G12，标记当前线路各站占用 */
+  const used = {};
+  route.stops.forEach(s=>(s.slots||[]).forEach(g=>used[g]=s.name));
+  const manifestHtml = Array.from({length:12},(_,i)=>{
+    const g = 'G'+(i+1);
+    const owner = used[g];
+    return '<div class="vm-cell'+(owner?' has':' free')+'" title="'+esc(owner||'空闲')+'">'+g+(owner?'':'·')+'</div>';
+  }).join('');
+
+  const confirmedMain = allStops().filter(s=>s.main && s.main.confirmed).length;
+  const total = allStops().length;
+  const pct = Math.round(confirmedMain/total*100);
+  const alerts = allStops().filter(s=>s.status==='escalated'||s.status==='broadcast');
+  const alertHtml = alerts.map(s=>'<div class="va-alert '+(s.status==='broadcast'?'bad':'warn')+'">'
+    +'<span class="al-dot" style="background:'+STATUS[s.status].dot+'"></span>'
+    +'<span class="al-msg">'+esc(s.name)+' · '+STATUS[s.status].label+'</span>'
+    +'<span class="al-tag">'+esc(s.eta)+'</span></div>').join('') || '<div style="color:#3E5A8C;font-size:12px;padding:6px 2px">全部停靠点已就绪</div>';
+
+  const issueHtml = stop.issues.length ? stop.issues.map(iss=>'<div class="issue-banner">'+ICONS.alert
+    +'<div><b>'+esc(iss.type)+' · '+esc(iss.status)+'</b><div style="margin-top:2px">'+esc(iss.desc)+' · '+esc(iss.t)+'</div></div></div>').join('') : '';
+
+  host.innerHTML =
+    '<div class="ver-banner"><span class="bn-tag">'+ICONS.radar+'A · 调度舱</span>'
+    +'平台调度运营视角 · 全链路监控停靠点确认状态，前一晚 22:00 前完成主责绑定，异常自动外溢'
+    +'<span class="bn-actions"><button class="bn-btn" id="aSimConfirm">模拟进入明晚确认窗口</button>'
+    +'<button class="bn-btn" id="aReset">重置演示</button></span></div>'
+    +'<div class="va-top">'
+    +'<div><h1>'+esc(route.name)+'</h1><div class="va-date">今日 '+route.stops.length+' 站 · '+esc(route.depart)+' '+route.etd+' 发车 · 数据为示例演示</div></div>'
+    +'<div class="va-vehicle">'
+    +'<div class="vv-cell"><div class="vv-k">车辆</div><div class="vv-v">'+veh.id+'</div></div>'
+    +'<div class="vv-cell"><div class="vv-k">车牌</div><div class="vv-v mono">'+veh.plate+'</div></div>'
+    +'<div class="vv-cell"><div class="vv-k">电量</div><div class="vv-v '+(veh.battery<70?'warn':'good')+'">'+veh.battery+'%</div></div>'
+    +'<div class="vv-cell"><div class="vv-k">装载率</div><div class="vv-v">'+Math.round(veh.loadRate*100)+'%</div></div>'
+    +'</div>'
+    +'<div class="va-countdown"><div><div class="cd-k">距今晚确认截止</div><div class="cd-v">'+countdownToDeadline()+'</div></div></div>'
+    +'<div class="va-tabs">'+ROUTES.map(r=>'<button class="va-tab'+(r.id===state.route?' is-active':'')+'" data-route="'+r.id+'">'+esc(r.name)+'</button>').join('')+'</div>'
+    +'<div class="va-window"><b>'+confirmedMain+'/'+total+'</b>主责锁定</div>'
+    +'</div>'
+    +'<div class="va-body">'
+    +'<div class="va-track">'
+    +'<h2>'+ICONS.route+' 到站时序 · '+esc(route.name)+'　<span class="mono">'+esc(route.depart)+' →</span></h2>'
+    +'<div class="va-rail">'+stopsHtml+'</div>'
+    +'<div class="va-manifest"><h4>'+ICONS.grid+' 车辆 '+veh.id+' 格口装载图 · 按停靠站分配</h4><div class="vm-grid">'+manifestHtml+'</div></div>'
+    +'</div>'
+    +'<div class="va-side">'
+    +'<div class="va-detail">'
+    +issueHtml
+    +'<h3>'+esc(stop.name)+' '+statusPill(stop.status)+'</h3>'
+    +'<div class="vd-sub">'+esc(stop.area)+' · '+esc(stop.kind)+' · ETA '+stop.eta+' · 卸货预计 '+stop.estMin+' 分钟 · '+PROGRESS_LABEL[progress[stop.id]]+'</div>'
+    +'<div class="vd-grid">'
+    +'<div class="vd-cell"><div class="vc-label">'+ICONS.box+' 卸货量</div><div class="vc-main">'+stop.items+' 件 · '+stop.weightKg+' kg</div><div class="vc-sub">'+esc(stop.note||'标准作业')+'</div></div>'
+    +'<div class="vd-cell"><div class="vc-label">'+ICONS.wallet+' 卸货服务费</div><div class="vc-main">¥'+unloadFee(stop)+'</div><div class="vc-sub">含平台服务费 '+Math.round(CUT*100)+'%</div></div>'
+    +'</div>'
+    +'<div class="vd-cell" style="margin-bottom:12px"><div class="vc-label">'+ICONS.truck+' 车辆与格口</div>'
+    +'<div class="vc-main">'+veh.id+' · '+veh.plate+'</div>'
+    +'<div class="vc-sub" style="margin-top:6px">'+slotChips(stop)+' 预计 '+stop.estMin+' 分钟卸完</div></div>'
+    +'<div class="vc-label" style="margin-bottom:7px">'+ICONS.user+' 责任人绑定</div>'
+    +(stop.main? personCard(stop.main, true) : '<div class="bind-empty" style="margin-bottom:8px">主责暂未绑定</div>')
+    +(stop.backup.length? stop.backup.map(b=>personCard(b,false)).join('') : '<div class="bind-empty">未配置备选</div>')
+    +'<div class="vd-log"><div class="lg-title">'+ICONS.history+' 该站操作日志</div>'+logRows(stop,false)+'</div>'
+    +'<div class="vd-actions" style="margin-top:14px">'
+    + (stop.status==='broadcast'
+        ? '<button class="btn btn-primary" data-a-act="assign">指派片区驻点</button><button class="btn btn-ghost" data-a-act="recheck">重新确认</button>'
+        : stop.status==='escalated'
+        ? '<button class="btn btn-primary" data-a-act="confirm">确认主责到位</button><button class="btn btn-danger" data-a-act="overflow">外溢广播</button>'
+        : '<button class="btn btn-ghost" data-a-act="markdone">标记今日已卸货</button>')
+    +'</div>'
+    +'</div>'
+    +'<div class="va-summary">'
+    +'<div class="vs-row"><span class="vs-label">今晚主责确认进度</span><div class="va-bar"><i style="width:'+pct+'%"></i></div><span class="vs-num">'+confirmedMain+'/'+total+' · '+pct+'%</span></div>'
+    +'<div class="va-metrics">'
+    +'<div class="va-metric"><div class="vm-k">今日准点率</div><div class="vm-v good">98.2%</div></div>'
+    +'<div class="va-metric"><div class="vm-k">本周SLA履约</div><div class="vm-v">99.1%</div></div>'
+    +'<div class="va-metric"><div class="vm-k">本月赔付</div><div class="vm-v warn">2 笔</div></div>'
+    +'</div>'
+    +'<div class="vs-label" style="margin-bottom:7px">需要处理的异常停靠点（'+alerts.length+'）</div>'
+    +'<div class="va-alerts">'+alertHtml+'</div>'
+    +'</div>'
+    +'</div>'
+    +'</div>';
+
+  host.querySelectorAll('[data-stop]').forEach(el=>el.addEventListener('click',()=>{ state.selStop=el.dataset.stop; selStopCache=stopById(state.selStop); renderA(); }));
+  host.querySelectorAll('[data-route]').forEach(el=>el.addEventListener('click',()=>{
+    state.route=el.dataset.route;
+    const r=ROUTES.find(x=>x.id===state.route);
+    state.selStop=r.stops[0].id; selStopCache=null; renderA();
+  }));
+  host.querySelectorAll('[data-a-act]').forEach(el=>el.addEventListener('click',()=>{
+    const s=stopById(state.selStop); const act=el.dataset.aAct;
+    if(act==='assign'){ s.main={name:'驻点临时工',role:'平台指派',confirmed:true,score:4.2,phone:'190****0001'}; s.backup=[{name:'附近零工',role:'待命',confirmed:true,score:4.0}]; s.status='ready'; addLog(s,'平台指派片区驻点，站点恢复就绪'); toast('已指派驻点，'+s.name+' 恢复就绪'); }
+    if(act==='recheck'){ s.status='escalated'; if(s.main) s.main.confirmed=false; s.backup.forEach(b=>b.confirmed=false); addLog(s,'重新发起确认，等待责任人响应'); toast('已重新发起确认'); }
+    if(act==='confirm'){ if(!s.main){ toast('主责为空，请先指派片区驻点'); renderA(); return; } s.main.confirmed=true; s.status=s.backup.some(b=>b.confirmed)?'ready':'partial'; addLog(s,'调度台确认主责到位'); toast(s.name+' 主责已确认'); }
+    if(act==='overflow'){ s.status='broadcast'; s.main=null; s.backup=[]; addLog(s,'触发外溢广播，推送周边零工池'); toast(s.name+' 已推送零工池广播'); }
+    if(act==='markdone'){ progress[s.id]='done'; s.status='ready'; addLog(s,'调度台标记今日卸货完成'); toast(s.name+' 已标记卸货完成'); }
+    renderA();
+  }));
+  $('#aSimConfirm').addEventListener('click',()=>toast('已模拟进入明晚确认窗口（21:00–22:00）：系统自动向全部主责与备选发送确认单，未确认单将升级或外溢'));
+  $('#aReset').addEventListener('click',()=>{ resetProgressDefault(); restoreDemoBinding(); toast('已重置演示数据'); renderA(); });
+  clearInterval(window._cdTimer);
+  const cdEl=host.querySelector('.cd-v');
+  if(cdEl){ cdEl.textContent=countdownToDeadline(); window._cdTimer=setInterval(()=>{ if(cdEl.isConnected) cdEl.textContent=countdownToDeadline(); },30000); }
+  persist();
+}
+
+/* ============================================================
+   版本 B —— 企业工作台
+   ============================================================ */
+function bStats(){
+  const all=allStops();
+  return {all:all.length,
+    ready:all.filter(s=>s.status==='ready').length,
+    wait:all.filter(s=>s.status==='partial'||s.status==='escalated').length,
+    overflow:all.filter(s=>s.status==='broadcast').length,
+    done:Object.values(progress).filter(p=>p==='done').length,
+    totalFee:all.reduce((a,s)=>a+unloadFee(s),0)};
+}
+function renderB(){
+  const host=$('#verB');
+  if(state.bNav==='deliver') renderBDeliver(host);
+  else if(state.bNav==='create') renderBCreate(host);
+  else if(state.bNav==='staff') renderBStaff(host);
+  else if(state.bNav==='settle') renderBSettle(host);
+  else renderBRules(host);
+  bindBNav();
+  persist();
+}
+function bNavHtml(){
+  const st=bStats();
+  return '<div class="vb-nav">'
+    +'<div class="vb-brand"><div class="vb-logo">'+ICONS.truck+'</div><div><b>卸货履约台</b><span>黔惠生鲜连锁 · 企业版</span></div></div>'
+    +'<button class="vb-navitem'+(state.bNav==='deliver'?' is-active':'')+'" data-bnav="deliver">'+ICONS.route+' 今日配送'+(st.wait?'<span class="ni-badge warn">'+st.wait+'</span>':'')+'</button>'
+    +'<button class="vb-navitem'+(state.bNav==='create'?' is-active':'')+'" data-bnav="create">'+ICONS.plus+' 新建配送任务</button>'
+    +'<button class="vb-navitem'+(state.bNav==='staff'?' is-active':'')+'" data-bnav="staff">'+ICONS.user+' 责任人管理</button>'
+    +'<button class="vb-navitem'+(state.bNav==='settle'?' is-active':'')+'" data-bnav="settle">'+ICONS.wallet+' 卸货结算</button>'
+    +'<button class="vb-navitem'+(state.bNav==='rules'?' is-active':'')+'" data-bnav="rules">'+ICONS.shield+' 确认规则</button>'
+    +'<div class="vb-foot">示例数据 · 覆盖北城/南城/大学城 3 条线路 10 个停靠点<br>确认窗口：每晚 21:00–22:00 · 外部零工接入中</div>'
+    +'</div>';
+}
+function bindBNav(){
+  const host=$('#verB');
+  host.querySelectorAll('[data-bnav]').forEach(el=>el.addEventListener('click',()=>{ state.bNav=el.dataset.bnav; renderB(); }));
+  host.querySelectorAll('[data-bopen]').forEach(el=>el.addEventListener('click',()=>{ state.bDrawer=el.dataset.bopen; renderBDrawer(); $('#drawer').classList.add('open'); }));
+  host.querySelectorAll('[data-bf]').forEach(el=>el.addEventListener('click',()=>{ state.bFilter=el.dataset.bf; renderB(); }));
+}
+function renderBDeliver(host){
+  const st=bStats();
+  const filters=[['all','全部 ('+st.all+')'],['ready','已就绪 ('+st.ready+')'],['wait','待确认 ('+st.wait+')'],['overflow','已外溢 ('+st.overflow+')'],['done','已卸货 ('+st.done+')']];
+  let list=allStops();
+  if(state.bFilter==='ready') list=list.filter(s=>s.status==='ready');
+  if(state.bFilter==='wait') list=list.filter(s=>s.status==='partial'||s.status==='escalated');
+  if(state.bFilter==='overflow') list=list.filter(s=>s.status==='broadcast');
+  if(state.bFilter==='done') list=list.filter(s=>progress[s.id]==='done');
+  const rows=list.length?list.map(s=>{
+    const r=ROUTES.find(x=>x.stops.includes(s));
+    const person=s.main?s.main.name+(s.main.confirmed?'':'（待确认）'):'待外溢';
+    return '<tr class="clickable" data-bopen="'+s.id+'">'
+      +'<td><span class="t-strong">'+esc(s.name)+'</span><div class="t-muted">'+esc(r.name)+' · '+esc(s.area)+'</div></td>'
+      +'<td class="mono" style="color:#4A5A52">'+s.eta+'</td>'
+      +'<td>'+s.items+' 件<br><span class="t-muted">'+s.weightKg+' kg</span></td>'
+      +'<td>'+slotChips(s,true)+'</td>'
+      +'<td>'+(progress[s.id]==='done'?'<span class="status-pill st-done"><span class="sp-dot"></span>已完成</span>':statusPill(s.status))+'</td>'
+      +'<td>'+esc(person)+'</td>'
+      +'<td class="mono t-strong" style="color:#1F6B4F">¥'+unloadFee(s)+'</td>'
+      +'</tr>';
+  }).join(''):'<tr><td colspan="7"><div class="vb-empty">当前筛选下没有停靠点</div></td></tr>';
+  host.innerHTML='<div class="vb-layout">'+bNavHtml()
+    +'<div class="vb-main">'
+    +'<div class="vb-head"><div><h1>今日配送与卸货安排</h1><p>无人车到站后由绑定责任人完成卸货签收，责任人在明晚 22:00 前确认</p></div>'
+    +'<div class="vb-date">'+ICONS.clock+' '+cnDate()+'</div></div>'
+    +'<div class="vb-kpis">'
+    +'<div class="vb-kpi"><div class="k-label">'+ICONS.pin+' 今日停靠点</div><div class="k-num">'+st.all+'</div><div class="k-sub">3 条固定线路</div></div>'
+    +'<div class="vb-kpi"><div class="k-label">'+ICONS.check+' 已就绪</div><div class="k-num good">'+st.ready+'</div><div class="k-sub">主备均已确认</div></div>'
+    +'<div class="vb-kpi"><div class="k-label">'+ICONS.clock+' 待确认</div><div class="k-num warn">'+st.wait+'</div><div class="k-sub">主责或备选未确认</div></div>'
+    +'<div class="vb-kpi"><div class="k-label">'+ICONS.bolt+' 已外溢</div><div class="k-num bad">'+st.overflow+'</div><div class="k-sub">推送零工池兜底</div></div>'
+    +'</div>'
+    +'<div class="vb-filter">'+filters.map(f=>'<button class="vb-fbtn'+(state.bFilter===f[0]?' is-active':'')+'" data-bf="'+f[0]+'">'+f[1]+'</button>').join('')+'</div>'
+    +'<div class="vb-table"><table><thead><tr><th>停靠点</th><th>ETA</th><th>卸货量</th><th>格口</th><th>绑定状态</th><th>责任人</th><th>服务费</th></tr></thead><tbody>'+rows+'</tbody></table></div>'
+    +'<div class="vb-note">点击任意停靠点查看绑定明细、格口分配、操作日志，并执行确认 / 改派 / 外溢。示例为演示数据，计价与费率可配置。</div>'
+    +'</div></div>';
+}
+function renderBCreate(host){
+  host.innerHTML='<div class="vb-layout">'+bNavHtml()
+    +'<div class="vb-main">'
+    +'<div class="vb-head"><div><h1>新建配送任务</h1><p>为新增停靠点创建无人车配送与卸货安排，提交后进入当晚确认流程</p></div>'
+    +'<div class="vb-date">'+ICONS.calendar+' 次日班次</div></div>'
+    +'<div class="vb-form">'
+    +'<div class="f-row"><div class="f-field"><label>归属线路</label><select id="fRoute"><option value="R1">北城线</option><option value="R2">南城线</option><option value="R3">大学城线</option></select></div>'
+    +'<div class="f-field"><label>停靠点名称</label><input id="fName" placeholder="如：观山湖世纪城店"></div></div>'
+    +'<div class="f-row"><div class="f-field"><label>所在区域</label><input id="fArea" placeholder="如：观山湖区"></div>'
+    +'<div class="f-field"><label>预计到站时间</label><input id="fEta" placeholder="如：06:55"></div></div>'
+    +'<div class="f-row"><div class="f-field"><label>货物件数</label><input id="fItems" type="number" placeholder="0" value="30"></div>'
+    +'<div class="f-field"><label>总重量（kg）</label><input id="fWeight" type="number" placeholder="0" value="400"></div></div>'
+    +'<div class="f-row"><div class="f-field"><label>货品种类</label><input id="fKind" placeholder="如：生鲜 · 日配"></div>'
+    +'<div class="f-field"><label>责任来源</label><select id="fSrc"><option value="employee">内部员工复用（推荐）</option><option value="resident">片区驻点</option><option value="external">外部零工</option></select></div></div>'
+    +'<div class="f-field full"><label>备注（可选）</label><textarea id="fNote" placeholder="如：需在开店前卸完 / 含冷链 5 件"></textarea></div>'
+    +'<div class="checkline"><input type="checkbox" id="fCold" style="width:16px;height:16px"><span>含冷链货物（服务费 +5 元）</span></div>'
+    +'<div class="f-actions"><button class="f-submit" id="fSubmit">'+ICONS.send+' 提交任务</button><button class="f-cancel" id="fCancel">取消</button></div>'
+    +'</div>'
+    +'<div class="vb-note">提交后：明晚 21:00 自动向该停靠点责任人发送确认单 → 22:00 前未确认则升级备选 → 无人响应自动外溢零工池。SLA 承诺车到必卸。</div>'
+    +'</div></div>';
+  $('#fSubmit').addEventListener('click',()=>{
+    const route=ROUTES.find(r=>r.id===$('#fRoute').value);
+    const name=$('#fName').value.trim()||'新停靠点';
+    const area=$('#fArea').value.trim()||'观山湖区';
+    const eta=$('#fEta').value.trim()||'07:30';
+    const items=parseInt($('#fItems').value)||30;
+    const weight=parseInt($('#fWeight').value)||400;
+    const kind=$('#fKind').value.trim()||'日配';
+    const src=$('#fSrc').value;
+    const cold=$('#fCold').checked;
+    const g='G'+(1+Math.floor(Math.random()*8));
+    const id='S'+(++seq);
+    const role=src==='employee'?'门店员工':(src==='resident'?'片区驻点':'零工');
+    route.stops.push({id:id,name:name,area:area,eta:eta,items:items,weightKg:weight,kind:kind+(cold?' · 冷链':''),slots:[g],estMin:Math.max(8,Math.round(items/2)),note:'新建任务',
+      main:{name:role,role:role,confirmed:false,score:4.5,phone:'--'},
+      backup:[],status:'escalated',history:[{t:nowTag(),act:'货主新建配送任务，已进入当晚确认流程'}],issues:[]});
+    if(!progress[id]) progress[id]='pending';
+    toast('已提交「'+name+'」，进入明晚确认流程');
+    state.bNav='deliver'; renderB();
+  });
+  $('#fCancel').addEventListener('click',()=>{ state.bNav='deliver'; renderB(); });
+}
+function renderBStaff(host){
+  const rows=STAFF.map(p=>'<tr>'
+    +'<td><span class="t-strong">'+esc(p.name)+'</span><div class="t-muted">'+esc(p.role)+'</div></td>'
+    +'<td>'+esc(p.station)+'</td>'
+    +'<td><span class="mono">'+ICONS.star+'</span> '+p.score.toFixed(1)+'</td>'
+    +'<td class="t-muted">'+p.ok+'%</td>'
+    +'<td>'+statusPill(p.state==='待确认'?'escalated':(p.state==='在岗'?'ready':'partial'))+'</td>'
+    +'</tr>').join('');
+  const reused=STAFF.length;
+  host.innerHTML='<div class="vb-layout">'+bNavHtml()
+    +'<div class="vb-main">'
+    +'<div class="vb-head"><div><h1>责任人管理</h1><p>内部员工复用为主力（L1 组织级绑定），驻点与零工作为片区备选池兜底</p></div>'
+    +'<div class="vb-date">'+ICONS.user+' 共 '+reused+' 人</div></div>'
+    +'<div class="vb-kpis">'
+    +'<div class="vb-kpi"><div class="k-label">'+ICONS.user+' 内部复用员工</div><div class="k-num good">'+reused+'</div><div class="k-sub">覆盖全部停靠点</div></div>'
+    +'<div class="vb-kpi"><div class="k-label">'+ICONS.bolt+' 片区驻点</div><div class="k-num">6</div><div class="k-sub">北城/南城/大学城</div></div>'
+    +'<div class="vb-kpi"><div class="k-label">'+ICONS.shield+' 平均履约率</div><div class="k-num good">97.2%</div><div class="k-sub">近 30 天</div></div>'
+    +'<div class="vb-kpi"><div class="k-label">'+ICONS.star+' 平均信用分</div><div class="k-num">4.7</div><div class="k-sub">双向评价体系</div></div>'
+    +'</div>'
+    +'<div class="vb-table"><table><thead><tr><th>姓名</th><th>所属站点</th><th>信用分</th><th>履约率</th><th>状态</th></tr></thead><tbody>'+rows+'</tbody></table></div>'
+    +'<div class="vb-note">责任人可复用门店收货/在岗员工（内部单不额外产生外部人力成本）；请假报备后自动进入备选池与外溢链路。</div>'
+    +'</div></div>';
+}
+function renderBSettle(host){
+  let list=allStops();
+  if(state.bSettleLine!=='all') list=list.filter(s=>ROUTES.find(r=>r.id===state.bSettleLine)&&ROUTES.find(r=>r.id===state.bSettleLine).stops.includes(s));
+  if(state.bSettleState==='done') list=list.filter(s=>progress[s.id]==='done');
+  if(state.bSettleState==='pending') list=list.filter(s=>progress[s.id]!=='done');
+  const rows=list.map(s=>{const r=ROUTES.find(x=>x.stops.includes(s));const fee=unloadFee(s);
+    return '<tr><td><span class="t-strong">'+esc(s.name)+'</span><div class="t-muted">'+esc(r.name)+' · '+cnDate()+'</div></td>'
+    +'<td>'+s.items+' 件 · '+s.weightKg+'kg</td>'
+    +'<td class="mono">¥'+fee.toFixed(2)+'</td>'
+    +'<td class="mono">¥'+(fee*CUT).toFixed(2)+'</td>'
+    +'<td class="mono" style="color:#1F6B4F">¥'+(fee*(1-CUT)).toFixed(2)+'</td>'
+    +'<td>'+(progress[s.id]==='done'?'<span class="status-pill st-done"><span class="sp-dot"></span>已完成</span>':statusPill(s.status))+'</td></tr>';}).join('')
+    || '<tr><td colspan="6"><div class="vb-empty">当前筛选下没有结算记录</div></td></tr>';
+  const feeTotal=list.reduce((a,s)=>a+unloadFee(s),0);
+  const monthFee=feeTotal*30;
+  const lineBtns=[['all','全部线路']].concat(ROUTES.map(r=>[r.id,r.name])).map(([k,n])=>
+    '<button class="vb-fbtn'+(state.bSettleLine===k?' is-active':'')+'" data-sl="'+k+'">'+n+'</button>').join('');
+  const stateBtns=[['all','全部状态'],['done','已完成'],['pending','待卸货']].map(([k,n])=>
+    '<button class="vb-fbtn'+(state.bSettleState===k?' is-active':'')+'" data-ss="'+k+'">'+n+'</button>').join('');
+  host.innerHTML='<div class="vb-layout">'+bNavHtml()
+    +'<div class="vb-main">'
+    +'<div class="vb-head"><div><h1>卸货服务结算</h1><p>仅计到站卸货环节服务费（基础 30 + 件数×0.5 + 重量附加 + 冷链附加），运输成本由无人车单独结算</p></div>'
+    +'<div class="vb-date">'+ICONS.clock+' '+cnDate()+' · 按日结算 · T+1 到账</div></div>'
+    +'<div class="vb-filter"><div class="vb-fgroup">'+lineBtns+'</div><div class="vb-fgroup">'+stateBtns+'</div></div>'
+    +'<div class="vb-settle-grid">'
+    +'<div class="vb-table"><table><thead><tr><th>停靠点</th><th>卸货量</th><th>服务费</th><th>平台服务费(15%)</th><th>责任人实得</th><th>状态</th></tr></thead><tbody>'+rows+'</tbody></table></div>'
+    +'<div class="vb-total">'
+    +'<div class="vb-head" style="margin-bottom:6px"><h1 style="font-size:16px">今日汇总</h1></div>'
+    +'<div class="tot-row"><span class="tr-label">筛选内站点</span><b class="mono">'+list.length+' 个</b></div>'
+    +'<div class="tot-row"><span class="tr-label">卸货服务费合计</span><b class="mono">¥'+feeTotal.toFixed(2)+'</b></div>'
+    +'<div class="tot-row"><span class="tr-label">平台服务费（'+Math.round(CUT*100)+'%）</span><b class="mono">¥'+(feeTotal*CUT).toFixed(2)+'</b></div>'
+    +'<div class="tot-row"><span class="tr-label">责任人实得</span><b class="mono">¥'+(feeTotal*(1-CUT)).toFixed(2)+'</b></div>'
+    +'<div class="tot-row total"><span class="tr-label">月度预估（30 日）</span><b class="mono">¥'+monthFee.toFixed(2)+'</b></div>'
+    +'<div class="tot-note">汇总随上方筛选联动。无人车替换司机后，卸货环节整体外包，人力从固定成本转为按需成本。</div>'
+    +'<div class="vb-bills"><button class="bill" data-bill>下载本月账单</button><button class="bill" data-bill>查看 T+1 到账明细</button></div>'
+    +'</div>'
+    +'</div>'
+    +'<div class="vb-note">结算路径：货主按月向平台结算 → 平台抽成后按 T+1 向责任人/驻点结算 → 内部员工复用单走企业内部代发。参数均可配置。</div>'
+    +'</div></div>';
+  host.querySelectorAll('[data-sl]').forEach(b=>b.addEventListener('click',()=>{ state.bSettleLine=b.dataset.sl; renderB(); }));
+  host.querySelectorAll('[data-ss]').forEach(b=>b.addEventListener('click',()=>{ state.bSettleState=b.dataset.ss; renderB(); }));
+  host.querySelectorAll('[data-bill]').forEach(b=>b.addEventListener('click',()=>toast('已生成账单导出任务（演示），将在 1 分钟内通过消息中心送达')));
+}
+function renderBRules(host){
+  host.innerHTML='<div class="vb-layout">'+bNavHtml()
+    +'<div class="vb-main">'
+    +'<div class="vb-head"><div><h1>确定性绑定规则</h1><p>平台对货主承诺“车到必卸”，靠三层绑定机制 + SLA 赔付保证</p></div></div>'
+    +'<div class="vb-table"><table><thead><tr><th>层级</th><th>绑定对象</th><th>生效时间</th><th>说明</th></tr></thead><tbody>'
+    +'<tr><td><span class="t-strong">L1 · 组织级长绑定</span></td><td>停靠点（门店/驻点）</td><td>一次建档长期有效</td><td class="t-muted">绑定站点而非个人，谁在岗谁扫码，扫码即担责</td></tr>'
+    +'<tr><td><span class="t-strong">L2 · 每日闭环确认</span></td><td>主责 + 备选 1-2 名</td><td>前一晚 21:00–22:00</td><td class="t-muted">一键确认；未确认自动升级备选，22:00 截止后外溢</td></tr>'
+    +'<tr><td><span class="t-strong">L3 · 平台兜底</span></td><td>周边零工 / 片区共享池</td><td>次日发车前</td><td class="t-muted">外溢广播 + SLA：车到 15 分钟内无人到场自动赔付</td></tr>'
+    +'</tbody></table></div>'
+    +'<div class="vb-note">优先级：内部员工复用（L1）→ 片区备选池（L2）→ 零工兜底（L3）。备选按片区共享，3-5 个停靠点共用一个备选池，控制成本同时保住确定性。SLA 赔付：无人到场超过 15 分钟，货主可获服务费 20% 的自动赔付。</div>'
+    +'</div></div>';
+}
+
+/* 抽屉（版本 B 详情） */
+function renderBDrawer(){
+  const s=stopById(state.bDrawer);
+  if(!s) return;
+  const d=$('#drawer');
+  const bindRow=(label,p,cls)=>{
+    if(!p) return '<div class="bind-empty">暂未绑定</div>';
+    return '<div class="bind-row"><span class="br-role '+cls+'">'+label+'</span>'
+      +'<div><div class="br-name">'+esc(p.name)+'</div><div class="br-sub">'+esc(p.role)+' · 信用分 '+p.score.toFixed(1)+'</div></div>'
+      +'<span class="br-state '+(p.confirmed?'ok':'no')+'">'+(p.confirmed?'已确认':'待确认')+(p.phone?'<span class="br-phone">'+ICONS.phone+' '+esc(p.phone)+'</span>':'')+'</span></div>';
+  };
+  const actions=s.status==='ready'
+    ? '<button class="vb-btn soft" data-bact="done">'+ICONS.check+' 标记今日已卸货</button><button class="vb-btn warn-soft" data-bact="swap">更换责任人</button>'
+    : s.status==='partial'
+    ? '<button class="vb-btn primary" data-bact="confbackup">'+ICONS.check+' 确认备选到位</button><button class="vb-btn danger-soft" data-bact="overflow">广播外溢</button>'
+    : s.status==='escalated'
+    ? '<button class="vb-btn primary" data-bact="confmain">'+ICONS.check+' 主责确认到位</button><button class="vb-btn danger-soft" data-bact="overflow">广播外溢</button>'
+    : '<button class="vb-btn primary" data-bact="assign">'+ICONS.bolt+' 指派片区驻点</button><button class="vb-btn soft" data-bact="recheck">重新发起确认</button>';
+  const issueHtml=s.issues.length?s.issues.map(iss=>'<div class="issue-banner">'+ICONS.alert+'<div><b>'+esc(iss.type)+' · '+esc(iss.status)+'</b><div style="margin-top:2px">'+esc(iss.desc)+' · '+esc(iss.t)+'</div></div></div>').join(''):'';
+  d.querySelector('.vd-head').innerHTML='<div><h3>'+esc(s.name)+'</h3><p>'+esc(s.area)+' · '+esc(s.kind)+' · ETA '+s.eta+' · '+s.items+' 件 / '+s.weightKg+'kg</p></div><button class="vd-close" data-bclose>×</button>';
+  d.querySelector('.vd-body').innerHTML=issueHtml
+    +'<div class="vd-sec"><div class="vs-title">责任人绑定 · '+STATUS[s.status].label+'</div>'
+    +bindRow('主责',s.main,'main')
+    +(s.backup.length?s.backup.map((b,i)=>bindRow('备选'+(i+1),b,'')).join(''):'<div class="bind-empty">未配置备选</div>')+'</div>'
+    +'<div class="vd-sec"><div class="vs-title">'+ICONS.grid+' 格口与作业</div>'
+    +'<div class="bind-row"><div><div class="br-name">'+slotChips(s,true)+'</div><div class="br-sub">预计 '+s.estMin+' 分钟 · '+esc(s.note||'标准作业')+'</div></div></div></div>'
+    +'<div class="vd-sec"><div class="vs-title">卸货服务费</div>'
+    +'<div class="bind-row"><div><div class="br-name" style="font-size:15px">¥'+unloadFee(s)+'</div><div class="br-sub">基础 30 + 件数×0.5 + 重量附加'+(s.kind.includes('冷链')?' + 冷链 5':'')+' · 含平台服务费</div></div></div></div>'
+    +'<div class="vd-sec"><div class="vs-title">'+ICONS.history+' 操作日志</div><div class="vd-log">'+logRows(s,true)+'</div></div>'
+    +'<div class="vd-sec"><div class="vs-title">操作</div><div class="vd-actions">'+actions+'</div></div>';
+  d.querySelector('[data-bclose]').addEventListener('click',()=>d.classList.remove('open'));
+  d.querySelectorAll('[data-bact]').forEach(el=>el.addEventListener('click',()=>{
+    const act=el.dataset.bact;
+    if(act==='done'){ progress[s.id]='done'; s.status='ready'; addLog(s,'货主端标记卸货完成'); toast(s.name+' 已标记卸货完成'); }
+    if(act==='swap'){ s.main={name:'片区驻点（换班）',role:'门店收货员',confirmed:true,score:4.4,phone:'--'}; s.backup=[{name:'原责任人',role:'备选',confirmed:true,score:4.5}]; s.status='ready'; addLog(s,'货主端更换责任人'); toast('已更换责任人'); }
+    if(act==='confbackup'){ s.backup.forEach(b=>b.confirmed=true); s.status='ready'; addLog(s,'备选确认到位，站点就绪'); toast('备选已确认，'+s.name+' 就绪'); }
+    if(act==='overflow'){ s.status='broadcast'; s.main=null; s.backup=[]; addLog(s,'货主端触发外溢广播'); toast(s.name+' 已推送零工池广播'); }
+    if(act==='confmain'){ if(!s.main){ toast('主责为空，请先指派片区驻点'); d.classList.remove('open'); renderB(); return; } s.main.confirmed=true; s.status=s.backup.some(b=>b.confirmed)?'ready':'partial'; addLog(s,'货主端确认主责到位'); toast(s.name+' 主责已确认'); }
+    if(act==='assign'){ s.main={name:'驻点临时工',role:'平台指派',confirmed:true,score:4.2,phone:'190****0001'}; s.backup=[{name:'附近零工',role:'待命',confirmed:true,score:4.0}]; s.status='ready'; addLog(s,'指派片区驻点，站点恢复就绪'); toast('已指派驻点，'+s.name+' 就绪'); }
+    if(act==='recheck'){ s.status='escalated'; if(s.main) s.main.confirmed=false; s.backup.forEach(b=>b.confirmed=false); addLog(s,'重新发起确认'); toast('已重新发起确认'); }
+    d.classList.remove('open'); renderB();
+  }));
+}
+
+/* ============================================================
+   版本 C —— 履约现场
+   ============================================================ */
+/* 到场定位校验：责任人确认到场（开始卸货）前，必须位于站点附近（默认 200 米内） */
+const ARRIVE_RADIUS_M=200;
+/* 责任人确认接单：把确认写回站点绑定状态，A/B 版同步可见 */
+function confirmWorkerFor(s, w){
+  w = w || WORKER;
+  if(s.main && s.main.name===w.name){ s.main.confirmed=true; }
+  else if(s.backup.some(b=>b.name===w.name)){ s.backup.find(b=>b.name===w.name).confirmed=true; }
+  else {
+    /* 新责任人到场：顶替为主责，原主责降级为备选，保证 A/B 版状态一致且不污染数据 */
+    if(s.main) s.backup.unshift(s.main);
+    s.main={name:w.name, role:w.role||'责任人', confirmed:true, score:w.score||4.5, phone:w.phone||'--'};
+  }
+  if(s.main && s.main.confirmed){ s.status = s.backup.some(b=>b.confirmed) ? 'ready' : 'partial'; }
+  else if(s.backup.some(b=>b.confirmed)){ s.status='partial'; }
+  else { s.status='escalated'; }
+}
+/* 责任人从抢单大厅认领外溢订单：绑定到站点并加入今日任务 */
+function cGrab(stopId){
+  const s=stopById(stopId);
+  if(!s) return;
+  if(MINE.find(m=>m.stopId===stopId)){ toast('该站点已在你的任务中'); return; }
+  MINE.push({stopId:stopId, role:'抢单', note:'零工池抢单 · 额外收入'});
+  if(!progress[stopId]) progress[stopId]='pending';
+  confirmWorkerFor(s, WORKER);
+  addLog(s,'责任人从零工池抢单，绑定'+WORKER.name);
+  toast('抢单成功：「'+s.name+'」已加入今日任务，预估收入 ¥'+cIncome(stopId).toFixed(2));
+  renderC();
+}
+function havM(lat1,lng1,lat2,lng2){
+  const R=6371000, rad=d=>d*Math.PI/180;
+  const dLat=rad(lat2-lat1), dLng=rad(lng2-lng1);
+  const a=Math.sin(dLat/2)*Math.sin(dLat/2)+Math.cos(rad(lat1))*Math.cos(rad(lat2))*Math.sin(dLng/2)*Math.sin(dLng/2);
+  return Math.round(R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a)));
+}
+function getMyPosition(cb){
+  if(!navigator.geolocation){ cb({ok:false,code:'unsupported'}); return; }
+  navigator.geolocation.getCurrentPosition(
+    p=>cb({ok:true,lat:p.coords.latitude,lng:p.coords.longitude}),
+    e=>cb({ok:false,code:e.code}),
+    {enableHighAccuracy:true,timeout:8000,maximumAge:5000});
+}
+function arriveCheck(stop, onPass){
+  const c=coordOf(stop);
+  getMyPosition(pos=>{
+    if(!pos.ok){
+      showArriveModal(stop,null,'无法获取定位（'+(pos.code===1?'未授权':pos.code===2?'无信号':pos.code===3?'超时':'失败')+'）',false,onPass);
+      return;
+    }
+    const d=havM(pos.lat,pos.lng,c[0],c[1]);
+    showArriveModal(stop,d,pos.lat.toFixed(5)+', '+pos.lng.toFixed(5),d<=ARRIVE_RADIUS_M,onPass);
+  });
+}
+function showArriveModal(stop,dist,posText,inRange,onPass){
+  const sc=coordOf(stop);
+  const okHtml = inRange
+    ? '<div class="chk-ok">'+ICONS.check+' 定位校验通过 · 已在站点 '+ARRIVE_RADIUS_M+' 米范围内</div>'
+    : '<div class="chk-far">'+ICONS.alert+' 你距离站点约 <b>'+dist+' 米</b>，超出 '+ARRIVE_RADIUS_M+' 米确认范围</div>';
+  openModal('到场定位校验 · '+esc(stop.name),
+    '<div class="vm-form">'
+    +'<p class="vm-cfg-tip">为保障履约确定性，确认到场并开启格口卸货前，系统会校验你的实时位置是否在站点附近。</p>'
+    +'<div class="chk-row"><span>站点</span><b>'+esc(stop.name)+'</b></div>'
+    +'<div class="chk-row"><span>站点坐标</span><b class="mono">'+sc[0].toFixed(5)+', '+sc[1].toFixed(5)+'</b></div>'
+    +'<div class="chk-row"><span>我的位置</span><b class="mono">'+(posText||'—')+'</b></div>'
+    +'<div class="chk-row"><span>距离</span><b>'+(dist==null?'—':dist+' 米')+'</b></div>'
+    +okHtml
+    +(inRange
+      ? '<div class="vm-form-foot"><button class="vm-btn" onclick="closeModal()">取消</button><button class="vm-btn primary" id="chkOk">'+ICONS.check+' 确认到场 · 开始卸货</button></div>'
+      : '<div class="vm-form-foot"><button class="vm-btn" onclick="closeModal()">取消</button><button class="vm-btn warn" id="chkOk">我已在现场 · 强制确认（演示）</button></div>')
+    +'</div>');
+  $('#chkOk').addEventListener('click',()=>{ closeModal(); onPass(); });
+}
+function cIncome(stopId){ return Math.round(unloadFee(stopById(stopId))*(1-CUT)*100)/100; }
+function cTotalIncome(){ return MINE.reduce((a,m)=>a+(progress[m.stopId]==='done'?cIncome(m.stopId):0),0); }
+function cTotalFee(){ return MINE.reduce((a,m)=>a+cIncome(m.stopId),0); }
+function renderC(){
+  const host=$('#verC');
+  const monthTotal=MY_BILLS.reduce((a,b)=>a+b.a,0);
+  const me=MINE.find(m=>m.stopId===state.selMine)||MINE[0];
+  const st=stopById(me.stopId);
+  const pg=progress[me.stopId];
+  const veh=VEHICLES[ROUTES.find(r=>r.stops.includes(st)).id] || {id:'未分配', plate:'--', battery:0, loadRate:0, status:'--', model:''};
+  const stepIdx={pending:0,arrived:1,unloading:2,done:3}[pg];
+
+  const cards=MINE.map(m=>{
+    const s=stopById(m.stopId); const p=progress[m.stopId];
+    const r=ROUTES.find(x=>x.stops.includes(s));
+    const issue=(s.issues&&s.issues.length)?'<span class="vt-issue">'+ICONS.alert+' '+s.issues[0].type+'</span>':'';
+    return '<div class="vc-task'+(m.stopId===me.stopId?' is-sel':'')+'" data-mine="'+m.stopId+'">'
+      +'<span class="vt-light" style="background:'+PROGRESS_DOT[p]+'"></span>'
+      +'<div class="vt-main"><div class="vt-name">'+esc(s.name)+'</div>'
+      +'<div class="vt-meta"><span>'+ICONS.pin+esc(s.area)+'</span><span>'+ICONS.clock+s.eta+' 到站</span>'
+      +'<span>'+ICONS.box+s.items+' 件 · '+s.weightKg+'kg</span><span>'+esc(r.name)+'</span></div>'
+      +'<div class="vt-extra">'+slotChips(s)+'<span class="chip" style="background:#1F2E18;color:#A3D93C">'+s.estMin+'min</span>'+issue+'</div></div>'
+      +'<div class="vt-fee"><b>¥'+cIncome(m.stopId).toFixed(2)+'</b><span>'+PROGRESS_LABEL[p]+' · '+m.role+(m.note&&m.role==='抢单'?'<em>'+esc(m.note)+'</em>':'')+'</span></div>'
+      +'</div>';
+  }).join('');
+
+  /* 抢单大厅：外溢广播且未在我的任务中的站点 */
+  const grabbable=allStops().filter(s=>s.status==='broadcast' && !MINE.find(m=>m.stopId===s.id));
+  const grabHtml=grabbable.length
+    ? '<div class="vc-grab"><div class="vg-head">'+ICONS.bolt+' 抢单大厅 <span class="t-muted">'+grabbable.length+' 单待抢 · 空余时间接一单多赚一笔</span></div>'
+      +grabbable.map(s=>'<div class="vg-item"><div class="vg-info"><b>'+esc(s.name)+'</b><span class="t-muted">'+esc(s.area)+' · '+s.items+' 件/'+s.weightKg+'kg · '+s.eta+' 到站 · 格口 '+s.slots.join(' ')+'</span></div>'
+        +'<span class="vg-fee">¥'+cIncome(s.id).toFixed(2)+'</span><button class="vg-btn" data-grab="'+s.id+'">'+ICONS.plus+' 抢单</button></div>').join('')
+      +'</div>'
+    : '';
+  const grabbedCount=MINE.filter(m=>m.role==='抢单').length;
+
+  const stepHtml=['确认接单','到场扫码','卸货签收','结算完成'].map((label,i)=>{
+    const cls=i<stepIdx?'is-done':(i===stepIdx?'is-cur':'');
+    return '<div class="vo-step '+cls+'"><span class="st-ic">'+(i<stepIdx?ICONS.check:(i+1))+'</span>'+label+(i<3?'<span class="st-line"></span>':'')+'</div>';
+  }).join('');
+
+  let panel='';
+  if(pg==='pending'){
+    panel='<div class="vo-panel"><div class="vp-label">下一步 · 确认今晚班次</div>'
+      +'<div class="vo-info">'
+      +'<div class="vi-cell"><div class="vik">到站</div><div class="viv">'+st.eta+'</div></div>'
+      +'<div class="vi-cell"><div class="vik">格口</div><div class="viv">'+st.slots.join(' ')+'</div></div>'
+      +'<div class="vi-cell"><div class="vik">预计时长</div><div class="viv">'+st.estMin+' min</div></div>'
+      +'</div>'
+      +'<div class="vo-scan"><span class="scan-ic">'+ICONS.check+'</span><div><b>确认明早 '+st.eta+' 到站班次</b><span>确认后平台为你锁定该停靠点 · 作为'+me.role+' · 到站前 15 分钟自动提醒</span></div></div>'
+      +'<button class="vc-bigbtn" data-cact="confirm">'+ICONS.check+' 确认接单</button>'
+      +'<div class="vo-income"><div class="vi-row"><span>预计本单收入</span><b>¥'+cIncome(me.stopId).toFixed(2)+'</b></div>'
+      +'<div class="vi-row"><span>准点到场奖励</span><b style="color:#A3D93C">+¥2.00</b></div></div>'
+      +'</div>';
+  } else if(pg==='arrived'){
+    panel='<div class="vo-panel"><div class="vp-label">下一步 · 无人车已到站</div>'
+      +'<div class="vo-info">'
+      +'<div class="vi-cell"><div class="vik">车辆</div><div class="viv">'+veh.id+'</div></div>'
+      +'<div class="vi-cell"><div class="vik">车牌</div><div class="viv mono">'+veh.plate+'</div></div>'
+      +'<div class="vi-cell"><div class="vik">格口</div><div class="viv good">'+st.slots.join(' ')+'</div></div>'
+      +'</div>'
+      +'<div class="vo-scan"><span class="scan-ic">'+ICONS.scan+'</span><div><b>扫描车身二维码</b><span>订单 '+st.id+' · 对应格口 '+st.slots.join(' ')+' 将自动弹开 · 请在 10 分钟内完成交接</span></div></div>'
+      +'<button class="vc-bigbtn secondary" data-cact="unload">'+ICONS.box+' 扫码开箱 · 开始卸货</button>'
+      +'</div>';
+  } else if(pg==='unloading'){
+    panel='<div class="vo-panel"><div class="vp-label">下一步 · 正在卸货</div>'
+      +'<div class="vo-info">'
+      +'<div class="vi-cell"><div class="vik">件数</div><div class="viv">'+st.items+' 件</div></div>'
+      +'<div class="vi-cell"><div class="vik">重量</div><div class="viv">'+st.weightKg+'kg</div></div>'
+      +'<div class="vi-cell"><div class="vik">搬运</div><div class="viv">收货区码放</div></div>'
+      +'</div>'
+      +'<div class="vo-scan"><span class="scan-ic">'+ICONS.box+'</span><div><b>格口 '+st.slots.join(' ')+' 已全部开启</b><span>核对件数后签收 · '+esc(st.note||'')+'</span></div></div>'
+      +'<button class="vc-bigbtn" data-cact="sign">'+ICONS.check+' 完成卸货 · 签收</button>'
+      +'<div class="vo-anomaly"><div class="an-title">'+ICONS.alert+' 到货异常上报</div>'
+      +(state.cIssueOpen
+        ?'<select id="issueType"><option value="缺货">缺货（件数不符）</option><option value="破损">货物破损</option><option value="错货">货品不符</option></select>'
+        +'<textarea id="issueDesc" placeholder="补充说明（可选）"></textarea>'
+        +'<button class="an-btn" data-cact="submitIssue">'+ICONS.send+' 提交异常</button>'
+        :'<button class="an-btn" data-cact="openIssue">'+ICONS.alert+' 有缺货 / 破损？</button>')
+      +'</div>'
+      +'</div>';
+  } else {
+    panel='<div class="vo-panel"><div class="vp-label">本单已完成</div>'
+      +'<div class="vo-scan"><span class="scan-ic" style="background:#1F2E18;color:#A3D93C">'+ICONS.check+'</span><div><b>已签收 · 收入入账</b><span>¥'+cIncome(me.stopId).toFixed(2)+' 预计 T+1 结算到账 · 已计入本月履约 '+WORKER.streak+' 天连续</span></div></div>'
+      +'<div class="vo-income"><div class="vi-row"><span>本单服务费（85%）</span><b>¥'+cIncome(me.stopId).toFixed(2)+'</b></div>'
+      +'<div class="vi-row"><span>准点到场奖励</span><b style="color:#A3D93C">+¥2.00</b></div>'
+      +'<div class="vi-row"><span>平台抽成（15%）</span><b>-¥'+Math.round(unloadFee(st)*CUT*100)/100+'</b></div></div>'
+      +'<button class="vc-bigbtn secondary" data-cact="reset">回到待确认</button>'
+      +'</div>';
+  }
+
+  host.innerHTML=
+    '<div class="ver-banner"><span class="bn-tag">'+ICONS.hand+'C · 履约现场</span>'
+    +'一线责任人视角 · 确认接单、扫码开箱、卸货签收全流程演示，操作会实时推进状态'
+    +'<span class="bn-actions"><button class="bn-btn" id="cReset">重置演示</button></span></div>'
+    +'<div class="vc-top">'
+    +'<div class="vc-me"><span class="vc-avatar">陈</span><div><b>'+WORKER.name+'</b><span>'+WORKER.role+' · '+WORKER.area+' · 信用分 '+WORKER.score.toFixed(1)+' · 连续履约 '+WORKER.streak+' 天</span></div></div>'
+    +'<span class="vc-badge">'+ICONS.check+' 今晚已确认 '+MINE.filter(m=>progress[m.stopId]!=='pending').length+'/'+MINE.length+'</span>'
+    +'<div class="vc-shift">'
+    +'<div class="sh-cell"><div class="sc-num">'+MINE.length+'</div><div class="sc-label">今日班次</div></div>'
+    +'<div class="sh-cell"><div class="sc-num">'+grabbedCount+'</div><div class="sc-label">抢单</div></div>'
+    +'<div class="sh-cell"><div class="sc-num">'+grabbable.length+'</div><div class="sc-label">可抢单</div></div>'
+    +'<div class="sh-cell"><div class="sc-num">¥'+cTotalFee().toFixed(2)+'</div><div class="sc-label">预计收入</div></div>'
+    +'<div class="sh-cell"><div class="sc-num">¥'+cTotalIncome().toFixed(2)+'</div><div class="sc-label">已入账</div></div>'
+    +'<div class="sh-cell"><div class="sc-num">¥'+monthTotal.toFixed(2)+'</div><div class="sc-label">本月累计</div></div>'
+    +'</div></div>'
+    +'<div class="vc-body">'
+    +'<div class="vc-list"><h2>'+ICONS.layers+' 我的今日任务</h2>'+cards+'</div>'
+    +grabHtml
+    +'<div class="vc-ops"><h3>'+esc(st.name)+'</h3><div class="vo-sub">'+esc(st.area)+' · '+esc(st.kind)+' · 无人车 '+st.eta+' 到站 · 我的身份：'+me.role+'（'+me.note+'）</div>'
+    +'<div class="vo-steps">'+stepHtml+'</div>'+panel
+    +'<div class="vo-history"><div class="vh-title">'+ICONS.history+' 本单操作记录</div>'+logRows(st,true)+'</div>'
+    +'<div class="vo-history"><div class="vh-title">'+ICONS.wallet+' 本月收入明细</div>'
+    +MY_BILLS.map(b=>'<div class="vi-row"><span>'+b.d+' · '+esc(b.s)+'</span><b>¥'+b.a.toFixed(2)+' · '+b.st+'</b></div>').join('')
+    +'<div class="vi-row" style="border-top:1px dashed #1D262E"><span class="vi-total">本月累计</span><b class="vi-total">¥'+monthTotal.toFixed(2)+'</b></div></div>'
+    +'</div></div>';
+
+  host.querySelectorAll('[data-mine]').forEach(el=>el.addEventListener('click',()=>{ state.selMine=el.dataset.mine; state.cIssueOpen=false; renderC(); }));
+  host.querySelectorAll('[data-grab]').forEach(el=>el.addEventListener('click',()=>cGrab(el.dataset.grab)));
+  host.querySelectorAll('[data-cact]').forEach(el=>el.addEventListener('click',()=>{
+    const act=el.dataset.cact;
+    if(act==='confirm'){ progress[me.stopId]='arrived'; confirmWorkerFor(st, WORKER); addLog(st,'责任人确认接单'); toast('已确认接单，明早 '+st.eta+' 到站前到场'); }
+    if(act==='unload'){
+      arriveCheck(st, ()=>{
+        progress[me.stopId]='unloading';
+        addLog(st,'到场定位校验通过，扫码开箱，格口已开启');
+        toast('到场校验通过 · 已扫码开箱，格口 '+st.slots.join(' ')+' 开启');
+        renderC();
+      });
+    }
+    if(act==='sign'){ progress[me.stopId]='done'; addLog(st,'卸货完成并签收'); toast('卸货完成已签收，¥'+cIncome(me.stopId).toFixed(2)+' 将入账'); }
+    if(act==='reset'){ progress[me.stopId]='pending'; toast('已重置本单进度'); }
+    if(act==='openIssue'){ state.cIssueOpen=true; }
+    if(act==='submitIssue'){
+      const tp=$('#issueType')?$('#issueType').value:'缺货';
+      const ds=$('#issueDesc')?$('#issueDesc').value.trim():'';
+      st.issues.unshift({t:nowTag(),type:tp,desc:ds||'责任人在场上报',status:'处理中'});
+      addLog(st,'上报异常：'+tp);
+      state.cIssueOpen=false; toast('已上报「'+tp+'」，平台已通知货主与保险理赔');
+    }
+    renderC();
+  }));
+  $('#cReset').addEventListener('click',()=>{ resetProgressDefault(); restoreDemoBinding(); state.cIssueOpen=false; renderC(); toast('已重置演示进度'); });
+  persist();
+}
+
+/* ============================================================
+   版本 M —— 运营管理台（车辆 / 线路 / 人员 / 地图总览）
+   ============================================================ */
+const MLINE_COLORS = {R1:'#2DD4BF', R2:'#4F8BFF', R3:'#A78BFA'};
+let mMap=null, mMapLayer=null, mPick=null, mPickInput=null;
+const DEMO_ROUTES  = JSON.parse(JSON.stringify(ROUTES));
+const DEMO_VEHICLES= JSON.parse(JSON.stringify(VEHICLES));
+const DEMO_STAFF   = JSON.parse(JSON.stringify(STAFF));
+/* ============ 底图配置：默认高德公开栅格瓦片（视觉=高德地图、无需Key、无WebGL依赖、国内加载快）
+   可选 OSM / Carto 切换；任一源加载失败自动切换下一个 ============ */
+const TILE_SOURCES=[
+  {name:'高德地图', url:'https://wprd0{s}.is.autonavi.com/appmaptile?lang=zh_cn&size=1&scl=1&style=8&x={x}&y={y}&z={z}', subs:['1','2','3','4'], maxZoom:17},
+  {name:'高德·备用域', url:'https://webst0{s}.is.autonavi.com/appmaptile?style=8&x={x}&y={y}&z={z}', subs:['1','2','3','4'], maxZoom:17},
+  {name:'OSM', url:'https://tile.openstreetmap.org/{z}/{x}/{y}.png', maxZoom:19},
+  {name:'Carto浅色', url:'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', subs:['a','b','c','d'], maxZoom:19}
+];
+function loadTilePref(){ try{ const v=parseInt(localStorage.getItem('unload_tile_src')||'0',10); return (v>=0&&v<TILE_SOURCES.length)?v:0; }catch(e){ return 0; } }
+function saveTilePref(i){ try{ localStorage.setItem('unload_tile_src', String(i)); }catch(e){} }
+function mapSrc(){ return TILE_SOURCES[loadTilePref()].name; }
+let tileSrcIdx=loadTilePref(), tileErrCount=0;
+/* 探测底图源是否可用（拉取贵阳区域 z10 单张瓦片，5s 超时） */
+function probeTile(src, cb){
+  try{
+    const img=new Image();
+    let url=src.url.replace('{s}',(src.subs||['a'])[0]);
+    url=url.replace('{z}','10').replace('{x}','815').replace('{y}','433').replace('{r}','');
+    const t=setTimeout(()=>{ img.onload=img.onerror=null; cb(false); },5000);
+    img.onload=()=>{ clearTimeout(t); cb(true); };
+    img.onerror=()=>{ clearTimeout(t); cb(false); };
+    img.src=url;
+  }catch(e){ cb(false); }
+}
+/* 从偏好源开始探测，自动选用第一个可用的源 */
+function pickSource(cb){
+  let cur=tileSrcIdx, tried=0;
+  const next=()=>{
+    if(tried>=TILE_SOURCES.length){ cb(TILE_SOURCES[cur]); return; }
+    const src=TILE_SOURCES[cur]; tried++;
+    probeTile(src, ok=>{
+      if(ok){ tileSrcIdx=cur; tileErrCount=0; saveTilePref(tileSrcIdx); cb(src); }
+      else{ cur=(cur+1)%TILE_SOURCES.length; next(); }
+    });
+  };
+  next();
+}
+function addTileLayer(map){
+  pickSource(src=>{
+    const opts={maxZoom:src.maxZoom, attribution:'© '+src.name};
+    if(src.subs) opts.subdomains=src.subs;
+    const tl=L.tileLayer(src.url, opts).addTo(map);
+    tl.on('tileerror',()=>{
+      tileErrCount++;
+      if(tileErrCount>=8 && tileSrcIdx<TILE_SOURCES.length-1){
+        tileSrcIdx++; tileErrCount=0; saveTilePref(tileSrcIdx);
+        try{ map.removeLayer(tl); }catch(e){}
+        addTileLayer(map);
+      }
+    });
+  });
+}
+/* Leaflet 库多源加载（jsdelivr 偶发不可达时换源） */
+const LEAF_CDNS=[
+  'https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js',
+  'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js',
+  'https://cdn.bootcdn.net/ajax/libs/leaflet/1.9.4/leaflet.min.js'
+];
+function loadLeaflet(cb){
+  if(typeof L!=='undefined'){ cb&&cb(); return; }
+  let i=0;
+  const tryNext=()=>{
+    if(i>=LEAF_CDNS.length){ cb&&cb(); return; }
+    const s=document.createElement('script');
+    s.src=LEAF_CDNS[i++];
+    s.onload=()=>{ if(typeof L!=='undefined'){ cb&&cb(); } else tryNext(); };
+    s.onerror=tryNext;
+    document.head.appendChild(s);
+  };
+  tryNext();
+}
+/* 车辆沿线路移动动画（状态点随站点履约进度联动） */
+let vehTicker=null, vehAnimMarkers={}, vehAnimStep={}, vehStopMarkers={};
+function stopDotColor(pg){ return PROGRESS_DOT[pg] || '#6C7E8C'; }
+function vehMarkerHtml(v, color, pg){ return '<div class="veh-mk" style="background:'+color+'">'+v+'<i class="veh-st" style="background:'+stopDotColor(pg)+'"></i></div>'; }
+function stopVehicleAnim(){
+  if(vehTicker){ clearInterval(vehTicker); vehTicker=null; }
+}
+function startVehicleAnim(){
+  stopVehicleAnim();
+  const seqs=ROUTES.map(r=>[coordOf({id:'仓',name:r.depart})].concat(r.stops.map(s=>coordOf(s))));
+  if(!seqs.some(s=>s.length>1)) return;
+  const tick=()=>{
+    ROUTES.forEach((r,ri)=>{
+      const seq=seqs[ri]; if(!seq||seq.length<2) return;
+      if(!vehAnimMarkers[ri]) return;
+      vehAnimStep[ri]=((vehAnimStep[ri]||0)+1)%seq.length;
+      const c=seq[vehAnimStep[ri]];
+      try{ vehAnimMarkers[ri].setLatLng([c[0],c[1]]); }catch(e){}
+      /* 车辆状态点：反映当前所在站点的履约进度 */
+      const cur=r.stops[vehAnimStep[ri]-1];
+      const pg=cur?progress[cur.id]:'pending';
+      try{
+        vehAnimMarkers[ri].setIcon(L.divIcon({className:'veh-ic', html:vehMarkerHtml((VEHICLES[r.id]||{id:'--'}).id, MLINE_COLORS[r.id], pg), iconSize:[36,20], iconAnchor:[18,10]}));
+      }catch(e){}
+      /* 站点标记颜色同步履约进度 */
+      if(vehStopMarkers[ri]) vehStopMarkers[ri].forEach((mk,i)=>{
+        const s=r.stops[i]; if(s) mk.setStyle({fillColor: stopDotColor(progress[s.id])});
+      });
+    });
+  };
+  vehTicker=setInterval(tick, 1600);
+}
+
+function fRow(label, input){ return '<div class="vm-frow"><label>'+label+'</label>'+input+'</div>'; }
+
+/* ============ 定位服务 ============
+   使用浏览器原生 Geolocation API 获取坐标，不接入任何第三方地图密钥，
+   避免前端暴露 Key / Secret（高德逆地理需后端代理，生产环境请勿在客户端硬编码密钥）。 */
+function locateMe(){
+  if(!mMap){ toast('地图未就绪，请稍候'); return; }
+  if(!navigator.geolocation){ toast('当前浏览器不支持定位'); return; }
+  toast('正在获取位置…');
+  navigator.geolocation.getCurrentPosition((pos)=>{
+    const lat=pos.coords.latitude, lng=pos.coords.longitude;
+    if(window._myLoc){ try{ mMap.removeLayer(window._myLoc); }catch(e){} }
+    window._myLoc=L.circleMarker([lat,lng],{radius:10,color:'#fff',weight:3,fillColor:'#3B82F6',fillOpacity:.95}).addTo(mMap);
+    mMap.flyTo([lat,lng],15,{duration:.8});
+    window._myLoc.bindPopup('<b>📍 我的位置</b><br><span class="t-muted">'+lat.toFixed(5)+', '+lng.toFixed(5)+'</span>').openPopup();
+    toast('我的位置：'+lat.toFixed(5)+', '+lng.toFixed(5)+'（逆地理地址需后端代理获取）');
+  },(err)=>{
+    toast('定位失败：'+(err.code===1?'已拒绝定位授权（请在浏览器设置中允许）':err.code===2?'无法获取位置信号':err.code===3?'定位超时':'未知错误'));
+  },{enableHighAccuracy:true, timeout:8000, maximumAge:5000});
+}
+
+function renderM(){
+  const host=$('#verM');
+  const tab=state.mNav||'map';
+  const navItems=[['map','地图总览',ICONS.grid],['vehicle','车辆管理',ICONS.truck],['route','线路管理',ICONS.route],['staff','人员管理',ICONS.user],['report','数据报表',ICONS.doc]];
+  const nav=navItems.map(n=>'<button class="vm-nav '+(tab===n[0]?'is-active':'')+'" data-mnav="'+n[0]+'">'+n[2]+n[1]+'</button>').join('');
+  const stopCount=ROUTES.reduce((n,r)=>n+r.stops.length,0);
+  const vehCount=Object.keys(VEHICLES).length;
+
+  let body='';
+  if(tab==='map') body=mMapHtml();
+  else if(tab==='vehicle') body=mVehicleHtml();
+  else if(tab==='route') body=mRouteHtml();
+  else if(tab==='report') body=mReportHtml();
+  else body=mStaffHtml();
+
+  host.innerHTML=
+    '<div class="ver-banner vm-banner"><span class="bn-tag">'+ICONS.settings+'M · 运营管理</span>'
+    +'平台配置视角 · 车辆 / 线路 / 人员 / 站点增删改查，地图总览一屏掌控'
+    +'<span class="bn-actions"><button class="bn-btn" id="mReset">恢复示例数据</button></span></div>'
+    +'<div class="vm-top"><nav class="vm-navs">'+nav+'</nav>'
+    +'<div class="vm-meta"><span>'+ROUTES.length+' 条线路</span><span>'+stopCount+' 个站点</span><span>'+vehCount+' 台车辆</span><span>'+STAFF.length+' 名责任人</span></div></div>'
+    +'<div class="vm-body">'+body+'</div>';
+
+  host.querySelectorAll('[data-mnav]').forEach(el=>el.addEventListener('click',()=>{ state.mNav=el.dataset.mnav; renderM(); }));
+  $('#mReset').addEventListener('click',resetDemoData);
+  bindM();
+  persist();
+}
+
+function mMapHtml(){
+  const cur=TILE_SOURCES[loadTilePref()];
+  const isGd=/高德/.test(cur.name);
+  return '<div class="vm-map-bar"><span class="mb-src">'+ICONS.pin+' 当前底图：<b>'+esc(cur.name)+'</b><span class="t-muted">'+(isGd?'高德中文瓦片 · 无需Key':'备用底图源')+'</span></span>'
+    +'<button class="vm-btn ghost" data-mact="locate">'+ICONS.pin+' 定位我的位置</button>'
+    +'<button class="vm-btn" data-mact="mapCfg">切换底图</button></div>'
+    +'<div class="vm-map-wrap">'
+    +'<div class="vm-map" id="mLeaflet"></div>'
+    +'<div class="vm-map-legend">'
+    +ROUTES.map(r=>'<span><i style="background:'+MLINE_COLORS[r.id]+'"></i>'+esc(r.name)+' · '+r.stops.length+' 站</span>').join('')
+    +'<span><i style="background:#8CA3C3"></i>分拣仓</span>'
+    +'</div>'
+    +'<div class="vm-map-tip">'+ICONS.pin+' 点击站点标记查看卸货信息 · 新建站点可在地图上点选位置（线路管理-加站点）</div>'
+    +'</div>';
+}
+function mVehicleHtml(){
+  const rows=Object.entries(VEHICLES).map(([rk,v])=>{
+    const r=ROUTES.find(x=>x.id===rk)||{};
+    return '<tr><td><b>'+esc(v.id)+'</b><div class="t-muted">'+esc(v.model||'')+'</div></td>'
+      +'<td class="mono">'+esc(v.plate)+'</td>'
+      +'<td><span class="vm-batt"><i style="width:'+v.battery+'%"></i></span>'+v.battery+'%</td>'
+      +'<td>'+Math.round(v.loadRate*100)+'%</td>'
+      +'<td>'+esc(v.status||'在运')+'</td>'
+      +'<td>'+esc(r.name||'未分配')+'</td>'
+      +'<td><div class="vm-ops"><button class="vm-btn" data-mact="editVehicle" data-id="'+rk+'">编辑</button><button class="vm-btn danger" data-mact="delVehicle" data-id="'+rk+'">删除</button></div></td></tr>';
+  }).join('');
+  return '<div class="vm-card"><div class="vm-card-head"><h3>'+ICONS.truck+' 车辆管理 <span class="vm-hint">车辆绑定线路运行，新增/编辑即时生效</span></h3>'
+    +'<button class="vm-btn primary" data-mact="addVehicle">'+ICONS.plus+' 新增车辆</button></div>'
+    +'<div class="vb-table vm-table"><table><thead><tr><th>车辆编号</th><th>车牌</th><th>电量</th><th>装载率</th><th>状态</th><th>所属线路</th><th>操作</th></tr></thead><tbody>'
+    +(rows||'<tr><td colspan="7" class="vm-empty-td">暂无车辆，点击右上角「新增车辆」</td></tr>')+'</tbody></table></div></div>';
+}
+function mRouteHtml(){
+  return ROUTES.map(r=>{
+    const stops=r.stops.map((s,i)=>{
+      return '<div class="vm-stop"><span class="vs-seq">'+(i+1)+'</span>'
+        +'<div class="vs-main"><b>'+esc(s.name)+'</b><span class="t-muted">'+esc(s.area)+' · '+s.eta+' 到站 · '+s.items+'件/'+s.weightKg+'kg · 格口 '+s.slots.join(' ')+' · '+(s.main?('主责 '+esc(s.main.name)):'外溢广播')+'</span></div>'
+        +'<div class="vs-ops"><button class="vm-btn" data-mact="editStop" data-rid="'+r.id+'" data-sid="'+s.id+'">编辑</button><button class="vm-btn danger" data-mact="delStop" data-rid="'+r.id+'" data-sid="'+s.id+'">删</button></div></div>';
+    }).join('');
+    return '<div class="vm-card"><div class="vm-card-head"><h3><i class="vm-rdot" style="background:'+MLINE_COLORS[r.id]+'"></i>'+esc(r.name)+' <span class="vm-hint">'+r.depart+' '+r.etd+' 发车 · '+r.stops.length+' 站</span></h3>'
+      +'<div class="vm-ops"><button class="vm-btn" data-mact="editRoute" data-id="'+r.id+'">编辑线路</button><button class="vm-btn primary" data-mact="addStop" data-id="'+r.id+'">'+ICONS.plus+' 加站点</button></div></div>'
+      +'<div class="vm-stops">'+(stops||'<div class="vm-empty-td">该线路暂无站点</div>')+'</div></div>';
+  }).join('')+'<button class="vm-btn primary vm-add-route" data-mact="addRoute">'+ICONS.plus+' 新增线路</button>';
+}
+function mStaffHtml(){
+  const rows=STAFF.map(p=>{
+    return '<tr><td><b>'+esc(p.name)+'</b><div class="t-muted">'+p.id+'</div></td><td>'+esc(p.role)+'</td><td>'+esc(p.station)+'</td>'
+      +'<td>'+p.score.toFixed(1)+'</td><td>'+p.ok+'%</td><td>'+esc(p.state)+'</td>'
+      +'<td><div class="vm-ops"><button class="vm-btn" data-mact="editStaff" data-id="'+p.id+'">编辑</button><button class="vm-btn danger" data-mact="delStaff" data-id="'+p.id+'">删除</button></div></td></tr>';
+  }).join('');
+  return '<div class="vm-card"><div class="vm-card-head"><h3>'+ICONS.user+' 人员管理 <span class="vm-hint">责任人 = 可绑定到停靠点的主责/备选</span></h3>'
+    +'<button class="vm-btn primary" data-mact="addStaff">'+ICONS.plus+' 新增人员</button></div>'
+    +'<div class="vb-table vm-table"><table><thead><tr><th>姓名</th><th>角色</th><th>绑定站点</th><th>信用分</th><th>履约率</th><th>状态</th><th>操作</th></tr></thead><tbody>'
+    +rows+'</tbody></table></div></div>';
+}
+/* 月度成本模型：车辆折旧(5年) / 电费 / 保险 / 维护 */
+function vehCostBase(model){
+  const m=model||'新石器 X3';
+  const t={'新石器 X3':{price:200000,insu:900,maint:500},'九识 Z5':{price:150000,insu:850,maint:450}}[m]||{price:180000,insu:880,maint:480};
+  return {price:t.price, insu:t.insu, maint:t.maint};
+}
+function vehMonthlyCost(model, km){
+  const b=vehCostBase(model);
+  const depre=Math.round(b.price/60);
+  const elec=Math.round(km*0.15*0.6*30);
+  return {depre:depre, elec:elec, insu:b.insu, maint:b.maint, total:depre+elec+b.insu+b.maint};
+}
+function lineKm(r){ return 16+r.stops.length*11; }
+function mReportHtml(){
+  const all=allStops();
+  const totalItems=all.reduce((n,s)=>n+s.items,0);
+  const totalFee=all.reduce((n,s)=>n+unloadFee(s),0);
+  const days=22;
+  const monthOrders=totalItems*1.2*days;
+  const monthFee=totalFee*days;
+  const monthCut=monthFee*CUT;
+  const monthLabor=monthFee*0.85;
+  const vehTotal=ROUTES.reduce((n,r)=>{ const v=VEHICLES[r.id]; return n+(v?vehMonthlyCost(v.model, lineKm(r)).total:0); },0);
+  const monthProfit=monthCut-vehTotal;
+  /* 线路对比 */
+  const lines=ROUTES.map(r=>{
+    const items=r.stops.reduce((n,s)=>n+s.items,0);
+    const fee=r.stops.reduce((n,s)=>n+unloadFee(s),0);
+    const orders=Math.round(r.stops.length*18*days);
+    const labor=fee*days*0.9;
+    const save=orders*6.5;
+    const vc=VEHICLES[r.id]?vehMonthlyCost(VEHICLES[r.id].model, lineKm(r)):{total:0,depre:0,elec:0,insu:0,maint:0};
+    const rev=fee*days;
+    const profit=rev*0.15-vc.total;
+    return {r,items,fee,orders,labor,save,vc,rev,profit};
+  });
+  const maxFee=Math.max.apply(null,lines.map(l=>l.fee),1);
+  const maxOrders=Math.max.apply(null,lines.map(l=>l.orders),1);
+  const maxRev=Math.max.apply(null,lines.map(l=>l.rev),1);
+  /* 单车成本拆解（按车型） */
+  const models=[];
+  lines.forEach(l=>{ if(VEHICLES[l.r.id] && !models.find(x=>x===VEHICLES[l.r.id].model)) models.push(VEHICLES[l.r.id].model); });
+  const costHtml=models.map(md=>{
+    const km=Math.round(lines.reduce((n,l)=>n+(VEHICLES[l.r.id]&&VEHICLES[l.r.id].model===md?lineKm(l.r):0),0));
+    const vc=vehMonthlyCost(md, km);
+    const max=Math.max(vc.depre,vc.elec,vc.insu,vc.maint,1);
+    const item=(k,v,label)=>{ return '<div class="rp-bar"><span class="rp-bk">'+label+'</span><div class="rp-bt"><i style="width:'+(v/max*100)+'%"></i></div><b>¥'+v.toLocaleString()+'</b></div>'; };
+    return '<div class="rp-line"><div class="rp-lh"><b>'+esc(md)+'</b><span class="t-muted">月合计 ¥'+vc.total.toLocaleString()+' / 车</span></div>'
+      +'<div class="rp-bars">'
+      +item('d',vc.depre,'折旧 /5年')
+      +item('e',vc.elec,'电费')
+      +item('i',vc.insu,'保险')
+      +item('m',vc.maint,'维护')
+      +'</div></div>';
+  }).join('');
+  /* 线路盈亏 */
+  const pnlRows=lines.map(l=>{
+    const bar=v=>Math.max(2,Math.round(v/maxRev*100));
+    return '<div class="rp-line"><div class="rp-lh"><span class="rp-rdot" style="background:'+MLINE_COLORS[l.r.id]+'"></span><b>'+esc(l.r.name)+'</b><span class="t-muted">'+l.r.stops.length+' 站 · 月 '+l.orders.toLocaleString()+' 单</span></div>'
+      +'<div class="rp-bars">'
+      +'<div class="rp-bar"><span class="rp-bk">月营收</span><div class="rp-bt"><i style="width:'+bar(l.rev)+'%"></i></div><b>¥'+l.rev.toLocaleString()+'</b></div>'
+      +'<div class="rp-bar"><span class="rp-bk">卸货人工</span><div class="rp-bt"><i style="width:'+bar(l.rev*0.85)+'%"></i></div><b>-¥'+Math.round(l.rev*0.85).toLocaleString()+'</b></div>'
+      +'<div class="rp-bar"><span class="rp-bk">车辆成本</span><div class="rp-bt"><i style="width:'+bar(l.vc.total)+'%"></i></div><b>-¥'+l.vc.total.toLocaleString()+'</b></div>'
+      +'<div class="rp-bar"><span class="rp-bk">平台毛利</span><div class="rp-bt good"><i style="width:'+bar(Math.max(0,l.profit))+'%"></i></div><b class="'+(l.profit>=0?'':'')+'">¥'+l.profit.toLocaleString()+'</b></div>'
+      +'</div></div>';
+  }).join('');
+  /* 近7日单量 */
+  const days7=[['08-20',132],['08-21',158],['08-22',141],['08-23',176],['08-24',154],['08-25',168],['08-26',149]];
+  const maxDay=Math.max.apply(null,days7.map(d=>d[1]));
+  /* 站点排行 */
+  const top=all.slice().sort((a,b)=>b.items-a.items).slice(0,5);
+  const maxItems=Math.max.apply(null,top.map(s=>s.items),1);
+  /* 责任人排行 */
+  const topS=STAFF.slice().sort((a,b)=>b.score-a.score).slice(0,5);
+  const maxScore=5;
+
+  const lineRows=lines.map(l=>{
+    return '<div class="rp-line"><div class="rp-lh"><span class="rp-rdot" style="background:'+MLINE_COLORS[l.r.id]+'"></span><b>'+esc(l.r.name)+'</b><span class="t-muted">'+l.r.stops.length+' 站 · 月 '+l.orders.toLocaleString()+' 单</span></div>'
+      +'<div class="rp-bars">'
+      +'<div class="rp-bar"><span class="rp-bk">月服务费</span><div class="rp-bt"><i style="width:'+(l.fee/maxFee*100)+'%"></i></div><b>¥'+l.fee.toLocaleString()+'</b></div>'
+      +'<div class="rp-bar"><span class="rp-bk">人工替代节省</span><div class="rp-bt good"><i style="width:'+(l.save/maxOrders*100)+'%"></i></div><b>¥'+l.save.toLocaleString()+'</b></div>'
+      +'</div></div>';
+  }).join('');
+
+  const dayHtml=days7.map(d=>{
+    const h=Math.round(d[1]/maxDay*100);
+    return '<div class="rp-day"><div class="rp-dv">'+d[1]+'</div><div class="rp-dcol"><i style="height:'+h+'%"></i></div><span>'+d[0].slice(3)+'</span></div>';
+  }).join('');
+
+  const topHtml=top.map(s=>{
+    return '<div class="rp-row"><span class="rp-rn">'+esc(s.name)+'</span><div class="rp-rt"><i style="width:'+(s.items/maxItems*100)+'%"></i></div><b>'+s.items+' 件</b></div>';
+  }).join('');
+  const staffHtml=topS.map(p=>{
+    return '<div class="rp-row"><span class="rp-rn">'+esc(p.name)+'</span><div class="rp-rt good"><i style="width:'+(p.score/maxScore*100)+'%"></i></div><b>'+p.score.toFixed(1)+'</b></div>';
+  }).join('');
+
+  return '<div class="vm-report">'
+    +'<div class="rp-kpis">'
+    +'<div class="rp-kpi"><div class="rk-v">'+(monthOrders|0).toLocaleString()+'</div><div class="rk-k">月预计单量（单）</div></div>'
+    +'<div class="rp-kpi"><div class="rk-v good">¥'+monthFee.toLocaleString()+'</div><div class="rk-k">月服务费收入</div></div>'
+    +'<div class="rp-kpi"><div class="rk-v warn">¥'+monthCut.toLocaleString()+'</div><div class="rk-k">平台抽成（15%）</div></div>'
+    +'<div class="rp-kpi"><div class="rk-v">98.2%</div><div class="rk-k">卸货准点率</div></div>'
+    +'</div>'
+    +'<div class="rp-kpis">'
+    +'<div class="rp-kpi"><div class="rk-v">¥'+monthLabor.toLocaleString()+'</div><div class="rk-k">卸货人工成本</div></div>'
+    +'<div class="rp-kpi"><div class="rk-v">¥'+vehTotal.toLocaleString()+'</div><div class="rk-k">车辆月总成本</div></div>'
+    +'<div class="rp-kpi"><div class="rk-v '+(monthProfit>=0?'good':'warn')+'">¥'+Math.round(monthProfit).toLocaleString()+'</div><div class="rk-k">平台估算毛利</div></div>'
+    +'<div class="rp-kpi"><div class="rk-v">¥'+Math.round(monthProfit/monthOrders*10)/10+'</div><div class="rk-k">单均毛利（元）</div></div>'
+    +'</div>'
+    +'<div class="vm-card"><div class="vm-card-head"><h3>'+ICONS.route+' 线路月度盈亏 <span class="vm-hint">营收×15%抽成 - 车辆成本 = 平台毛利</span></h3></div><div class="rp-lines">'+pnlRows+'</div></div>'
+    +'<div class="vm-card"><div class="vm-card-head"><h3>'+ICONS.truck+' 单车月度成本拆解 <span class="vm-hint">折旧5年 · 电耗0.15度/km · 电价0.6元</span></h3></div><div class="rp-lines">'+(costHtml||'<div class="vm-empty-td">暂无车辆配置</div>')+'</div></div>'
+    +'<div class="vm-card"><div class="vm-card-head"><h3>'+ICONS.route+' 线路运营对比 <span class="vm-hint">示例测算 · 基于当前站点配置</span></h3></div><div class="rp-lines">'+lineRows+'</div></div>'
+    +'<div class="vm-card"><div class="vm-card-head"><h3>'+ICONS.history+' 近 7 日单量趋势 <span class="vm-hint">全平台卸货订单量</span></h3></div><div class="rp-days">'+dayHtml+'</div></div>'
+    +'<div class="vm-card"><div class="vm-card-head"><h3>'+ICONS.box+' 站点卸货量 TOP5</h3></div>'+topHtml+'</div>'
+    +'<div class="vm-card"><div class="vm-card-head"><h3>'+ICONS.star+' 责任人信用分 TOP5</h3></div>'+staffHtml+'</div>'
+    +'</div>';
+}
+function bindM(){
+  $('#verM').querySelectorAll('[data-mact]').forEach(b=>b.addEventListener('click',()=>{
+    const act=b.dataset.mact, id=b.dataset.id, rid=b.dataset.rid, sid=b.dataset.sid;
+    if(act==='addVehicle') openVehicleForm();
+    else if(act==='editVehicle') openVehicleForm(id);
+    else if(act==='delVehicle') confirmDel('vehicle', id);
+    else if(act==='addRoute') openRouteForm();
+    else if(act==='editRoute') openRouteForm(id);
+    else if(act==='addStop') openStopForm(id);
+    else if(act==='editStop') openStopForm(rid, sid);
+    else if(act==='delStop') confirmDel('stop', rid+'|'+sid);
+    else if(act==='addStaff') openStaffForm();
+    else if(act==='editStaff') openStaffForm(id);
+    else if(act==='delStaff') confirmDel('staff', id);
+    else if(act==='mapCfg') openMapCfg();
+    else if(act==='locate') locateMe();
+  }));
+  if(state.mNav==='map') initMap();
+}
+
+/* ---- 弹窗 ---- */
+function openModal(title, bodyHtml){
+  let m=$('#mModal');
+  if(!m){
+    m=document.createElement('div'); m.id='mModal'; m.className='vm-modal';
+    m.innerHTML='<div class="vm-modal-box"><div class="vm-modal-head"><b></b><button class="vm-modal-x">'+ICONS.logout.replace('width="15"','width="13"')+'</button></div><div class="vm-modal-body"></div></div>';
+    document.body.appendChild(m);
+    m.addEventListener('click',e=>{ if(e.target===m) m.classList.remove('open'); });
+    m.querySelector('.vm-modal-x').addEventListener('click',()=>m.classList.remove('open'));
+  }
+  m.querySelector('.vm-modal-head b').textContent=title;
+  m.querySelector('.vm-modal-body').innerHTML=bodyHtml;
+  m.classList.add('open');
+}
+function closeModal(){ const m=$('#mModal'); if(m) m.classList.remove('open'); }
+
+/* ---- 车辆 ---- */
+function openVehicleForm(rk){
+  const v=rk?VEHICLES[rk]:null;
+  const rOpts=ROUTES.map(r=>'<option value="'+r.id+'"'+(rk===r.id?' selected':'')+'>'+esc(r.name)+'</option>').join('');
+  openModal(v?'编辑车辆 '+v.id:'新增车辆',
+    '<form class="vm-form" data-form="vehicle" data-id="'+(rk||'')+'">'
+    +fRow('车牌号','<input required id="mfPlate" value="'+(v?v.plate:'')+'" placeholder="如 贵A·D3100">')
+    +fRow('车型','<input id="mfModel" value="'+(v?(v.model||''):'')+'" placeholder="如 新石器 X3">')
+    +fRow('所属线路','<select id="mfRoute">'+rOpts+'</select>')
+    +fRow('电量 %','<input type="number" id="mfBatt" min="0" max="100" value="'+(v?v.battery:80)+'">')
+    +fRow('车辆状态','<select id="mfStatus"><option'+(v&&v.status==='在运'?' selected':'')+'>在运</option><option'+(v&&v.status==='待命'?' selected':'')+'>待命</option><option'+(v&&v.status==='维修'?' selected':'')+'>维修</option></select>')
+    +'<div class="vm-form-foot"><button type="button" class="vm-btn" onclick="closeModal()">取消</button><button class="vm-btn primary" type="submit">保存</button></div></form>');
+  $('#mModal form').addEventListener('submit',e=>{ e.preventDefault(); saveVehicle($('#mModal form').dataset.id); });
+}
+function saveVehicle(rk){
+  const plate=$('#mfPlate').value.trim();
+  if(!plate){ toast('请输入车牌号'); return; }
+  const route=$('#mfRoute').value;
+  let id;
+  if(rk && VEHICLES[rk]) id=VEHICLES[rk].id;
+  else if(VEHICLES[route]) id=VEHICLES[route].id;
+  else {
+    let max=0; Object.values(VEHICLES).forEach(v=>{ const n=parseInt(String(v.id||'').replace(/\D/g,''),10); if(n>max) max=n; });
+    id='V'+String(max+1).padStart(2,'0');
+  }
+  const rec={id:id, plate:plate, model:$('#mfModel').value.trim()||'新石器 X3', route:route, battery:+$('#mfBatt').value||80, loadRate:0.6+Math.random()*0.35, status:$('#mfStatus').value, driver:'无人·远程接管'};
+  if(rk && rk!==route && VEHICLES[rk]) delete VEHICLES[rk];
+  const old=VEHICLES[route];
+  VEHICLES[route]=rec;
+  closeModal(); renderM();
+  toast(old?(old.id===id?'车辆 '+id+' 已更新':'线路 '+route+' 已换为车辆 '+rec.id):'已新增车辆 '+rec.id+' · 线路 '+route);
+}
+/* ---- 线路 ---- */
+function openRouteForm(id){
+  const r=id?ROUTES.find(x=>x.id===id):null;
+  openModal(r?'编辑线路 '+r.id:'新增线路',
+    '<form class="vm-form" data-form="route" data-id="'+(id||'')+'">'
+    +fRow('线路名称','<input required id="mfRName" value="'+(r?r.name:'')+'" placeholder="如 观山湖线">')
+    +fRow('线路编号','<input id="mfRId" value="'+(r?r.id:'')+'"'+(r?' readonly':'')+' placeholder="如 R4">')
+    +fRow('发车仓','<input id="mfRDep" value="'+(r?r.depart:'观山湖分拣仓')+'">')
+    +fRow('发车时间','<input id="mfREtd" value="'+(r?r.etd:'06:30')+'" placeholder="如 06:30">')
+    +'<div class="vm-form-foot"><button type="button" class="vm-btn" onclick="closeModal()">取消</button><button class="vm-btn primary" type="submit">保存</button></div></form>');
+  $('#mModal form').addEventListener('submit',e=>{ e.preventDefault(); saveRoute($('#mModal form').dataset.id); });
+}
+function saveRoute(id){
+  const name=$('#mfRName').value.trim();
+  if(!name){ toast('请输入线路名称'); return; }
+  if(id){ const r=ROUTES.find(x=>x.id===id); if(r){ r.name=name; r.depart=$('#mfRDep').value.trim()||r.depart; r.etd=$('#mfREtd').value.trim()||r.etd; } }
+  else {
+    const rid=($('#mfRId').value.trim()||'') || ('R'+(ROUTES.length+1));
+    if(ROUTES.find(x=>x.id===rid)){ toast('线路编号已存在'); return; }
+    ROUTES.push({id:rid, name:name, depart:$('#mfRDep').value.trim()||'观山湖分拣仓', etd:$('#mfREtd').value.trim()||'06:30', stops:[]});
+  }
+  closeModal(); renderM(); toast(id?'线路已更新':'已新增线路 '+name);
+}
+/* ---- 站点 ---- */
+function openStopForm(rid, sid){
+  const r=ROUTES.find(x=>x.id===rid); if(!r){ toast('线路不存在'); return; }
+  const s=sid?r.stops.find(x=>x.id===sid):null;
+  const staffOpts=STAFF.map(p=>'<option value="'+p.name+'"'+(s&&s.main&&s.main.name===p.name?' selected':'')+'>'+esc(p.name)+' · '+esc(p.role)+'</option>').join('');
+  openModal((s?'编辑站点':'新增站点')+' · '+r.name,
+    '<form class="vm-form" data-form="stop" data-rid="'+rid+'" data-sid="'+(sid||'')+'">'
+    +fRow('站点名称','<input required id="mfSName" value="'+(s?s.name:'')+'" placeholder="如 观山湖万达店">')
+    +fRow('所在区域','<input id="mfSArea" value="'+(s?s.area:'')+'" placeholder="如 观山湖区">')
+    +fRow('到站时间','<input id="mfSEta" value="'+(s?s.eta:'07:00')+'" placeholder="如 07:00">')
+    +fRow('货物件数','<input type="number" id="mfSItems" value="'+(s?s.items:20)+'">')
+    +fRow('总重量 kg','<input type="number" id="mfSWeight" value="'+(s?s.weightKg:200)+'">')
+    +fRow('格口（空格分隔）','<input id="mfSSlots" value="'+(s?s.slots.join(' '):'G1 G2')+'" placeholder="如 G1 G2 G3">')
+    +fRow('预计卸货分钟','<input type="number" id="mfSMin" value="'+(s?s.estMin:10)+'">')
+    +fRow('主责人员','<select id="mfSMain"><option value="">（无 · 进入外溢广播）</option>'+staffOpts+'</select>')
+    +fRow('站点坐标','<div class="vm-coord-row"><input id="mfSLat" value="'+(s&&s.lat?s.lat:coordOf(s||{}).map(n=>n.toFixed(5)).join(', '))+'"> <button type="button" class="vm-btn" id="mfPick">'+ICONS.pin+' 地图点选</button></div> <span class="vm-hint">格式：纬度, 经度 · 也可直接在地图上点选</span>')
+    +'<div class="vm-form-foot"><button type="button" class="vm-btn" onclick="closeModal()">取消</button><button class="vm-btn primary" type="submit">保存</button></div></form>');
+  $('#mModal form').addEventListener('submit',e=>{ e.preventDefault(); saveStop($('#mModal form').dataset.rid, $('#mModal form').dataset.sid); });
+  $('#mfPick').addEventListener('click',()=>{
+    const cur=($('#mfSLat').value||'').trim().split(/[,\s]+/).map(Number);
+    const cv=(cur.length===2&&isFinite(cur[0])&&isFinite(cur[1]))?cur:null;
+    openPickMap((lat,lng)=>{ $('#mfSLat').value=lat.toFixed(5)+', '+lng.toFixed(5); }, cv);
+  });
+}
+function saveStop(rid, sid){
+  const r=ROUTES.find(x=>x.id===rid); if(!r){ return; }
+  const name=$('#mfSName').value.trim();
+  if(!name){ toast('请输入站点名称'); return; }
+  const mainName=$('#mfSMain').value;
+  const main=mainName?{name:mainName, role:(STAFF.find(p=>p.name===mainName)||{}).role||'门店员工', confirmed:false, score:4.8}:null;
+  const ll=($('#mfSLat').value||'').trim().split(/[,\s]+/).map(Number);
+  const lat=ll.length===2&&isFinite(ll[0])&&isFinite(ll[1])?ll[0]:undefined;
+  const lng=ll.length===2&&isFinite(ll[0])&&isFinite(ll[1])?ll[1]:undefined;
+  const rec={id:sid||('S'+new Date().getTime().toString().slice(-5)), name:name, area:$('#mfSArea').value.trim()||'未分区', eta:$('#mfSEta').value.trim()||'07:00', items:+$('#mfSItems').value||0, weightKg:+$('#mfSWeight').value||0, kind:'日配', slots:($('#mfSSlots').value||'G1').trim().split(/\s+/), estMin:+$('#mfSMin').value||10, note:'', main:main, backup:[], status:main?'escalated':'broadcast', history:[{t:nowTag(), act:'运营后台'+(sid?'更新':'新增')+'站点'}], issues:[], lat:lat, lng:lng};
+  if(sid){ const i=r.stops.findIndex(x=>x.id===sid); if(i>=0) r.stops[i]=rec; }
+  else { r.stops.push(rec); }
+  if(!progress[rec.id]) progress[rec.id]='pending';
+  closeModal(); renderM(); toast(sid?'站点已更新':'已新增站点 '+name);
+}
+/* ---- 人员 ---- */
+function openStaffForm(id){
+  const p=id?STAFF.find(x=>x.id===id):null;
+  openModal(p?'编辑人员 '+p.name:'新增人员',
+    '<form class="vm-form" data-form="staff" data-id="'+(id||'')+'">'
+    +fRow('姓名','<input required id="mfPName" value="'+(p?p.name:'')+'" placeholder="如 张师傅">')
+    +fRow('角色','<select id="mfPRole"><option'+(p&&p.role==='门店收货员'?' selected':'')+'>门店收货员</option><option'+(p&&p.role==='门店员工'?' selected':'')+'>门店员工</option><option'+(p&&p.role==='片区驻点'?' selected':'')+'>片区驻点</option><option'+(p&&p.role==='兼职'?' selected':'')+'>兼职</option></select>')
+    +fRow('绑定站点','<input id="mfPStation" value="'+(p?p.station:'')+'" placeholder="如 观山湖万达店 / 片区驻点池">')
+    +fRow('信用分','<input type="number" id="mfPScore" min="0" max="5" step="0.1" value="'+(p?p.score:4.5)+'">')
+    +fRow('履约率 %','<input type="number" id="mfPOk" min="0" max="100" value="'+(p?p.ok:90)+'">')
+    +fRow('状态','<select id="mfPState"><option'+(p&&p.state==='在岗'?' selected':'')+'>在岗</option><option'+(p&&p.state==='待确认'?' selected':'')+'>待确认</option><option'+(p&&p.state==='备选'?' selected':'')+'>备选</option><option'+(p&&p.state==='停用'?' selected':'')+'>停用</option></select>')
+    +'<div class="vm-form-foot"><button type="button" class="vm-btn" onclick="closeModal()">取消</button><button class="vm-btn primary" type="submit">保存</button></div></form>');
+  $('#mModal form').addEventListener('submit',e=>{ e.preventDefault(); saveStaff($('#mModal form').dataset.id); });
+}
+function saveStaff(id){
+  const name=$('#mfPName').value.trim();
+  if(!name){ toast('请输入姓名'); return; }
+  const rec={name:name, role:$('#mfPRole').value, station:$('#mfPStation').value.trim()||'未分配', score:+$('#mfPScore').value||4.5, ok:+$('#mfPOk').value||90, state:$('#mfPState').value};
+  if(id){ const p=STAFF.find(x=>x.id===id); if(p) Object.assign(p, rec); }
+  else { STAFF.push(Object.assign({id:'P'+String(STAFF.length+1).padStart(2,'0')}, rec)); }
+  closeModal(); renderM(); toast(id?'人员已更新':'已新增人员 '+name);
+}
+/* ---- 删除与恢复 ---- */
+function confirmDel(kind, key){
+  const label={vehicle:'该车辆', route:'该线路（含其全部站点）', stop:'该站点', staff:'该人员'}[kind];
+  openModal('确认删除',
+    '<div class="vm-confirm"><p>确定删除'+label+'吗？该操作不可撤销。</p>'
+    +'<div class="vm-form-foot"><button class="vm-btn" onclick="closeModal()">取消</button><button class="vm-btn danger" id="mCfmDel">确认删除</button></div></div>');
+  $('#mCfmDel').addEventListener('click',()=>doDel(kind,key));
+}
+function doDel(kind,key){
+  if(kind==='vehicle'){ delete VEHICLES[key]; }
+  else if(kind==='route'){ const i=ROUTES.findIndex(r=>r.id===key); if(i>=0){ ROUTES[i].stops.forEach(s=>delete progress[s.id]); ROUTES.splice(i,1); delete VEHICLES[key]; } }
+  else if(kind==='stop'){ const [rid,sid]=key.split('|'); const r=ROUTES.find(x=>x.id===rid); if(r){ r.stops=r.stops.filter(s=>s.id!==sid); } delete progress[sid]; }
+  else if(kind==='staff'){ const i=STAFF.findIndex(p=>p.id===key); if(i>=0) STAFF.splice(i,1); }
+  closeModal(); renderM(); toast('已删除');
+}
+function resetDemoData(){
+  ROUTES.length=0; ROUTES.push.apply(ROUTES, JSON.parse(JSON.stringify(DEMO_ROUTES)));
+  Object.keys(VEHICLES).forEach(k=>delete VEHICLES[k]); Object.assign(VEHICLES, JSON.parse(JSON.stringify(DEMO_VEHICLES)));
+  STAFF.length=0; STAFF.push.apply(STAFF, JSON.parse(JSON.stringify(DEMO_STAFF)));
+  resetProgressDefault();
+  closeModal(); renderM(); toast('已恢复示例数据');
+}
+/* ---- 地图 ---- */
+/* 地图统一入口：Leaflet + 高德公开栅格瓦片（默认），多源自动切换，任何环境不白屏 */
+function initMap(){
+  const box=$('#mLeaflet');
+  if(box) box.innerHTML='<div class="vm-map-loading"><i></i>地图加载中…<span>底图需联网加载，首次稍候</span></div>';
+  initLeaflet();
+}
+
+/* ---------- 开源地图 Leaflet（高德不可用/未配置时的兜底 · 多源瓦片自动切换） ---------- */
+function initLeaflet(){
+  const box=$('#mLeaflet'); if(!box) return;
+  const doInit=()=>{
+    if(typeof L==='undefined'){ box.innerHTML='<div class="vm-map-fail">地图组件加载失败：请检查网络后刷新重试。其余功能不受影响。</div>'; return; }
+    stopVehicleAnim(); vehAnimMarkers={}; vehAnimStep={}; vehStopMarkers={};
+    if(mMap && mMap.getContainer()===box && mMap._src==='osm'){
+      mMap.invalidateSize();
+      if(mMapLayer) mMapLayer.clearLayers();
+      else mMapLayer=L.layerGroup().addTo(mMap);
+    } else {
+      if(mMap){ try{ mMap.remove(); }catch(e){} }
+      mMap=null; mMapLayer=null;
+      box.innerHTML=''; /* 清掉加载占位，避免遮住地图 */
+      mMap=L.map('mLeaflet', {zoomControl:true}).setView([26.60,106.66],12);
+      mMap._src='osm';
+      addTileLayer(mMap); /* 高德栅格 → OSM → Carto 自动切换 */
+      mMapLayer=L.layerGroup().addTo(mMap);
+      if(mPick){ mMap.on('click', e=>{ mPick(e.latlng.lat, e.latlng.lng); }); }
+    }
+    ROUTES.forEach((r,ri)=>{
+      const pts=[coordOf({id:'仓', name:r.depart})].concat(r.stops.map(s=>coordOf(s)));
+      L.polyline(pts,{color:MLINE_COLORS[r.id], weight:3, opacity:.75}).addTo(mMapLayer);
+      const dc=coordOf({id:'仓', name:r.depart});
+      L.circleMarker(dc,{radius:5,color:'#fff',weight:2,fillColor:'#8CA3C3',fillOpacity:1}).bindPopup('<b>'+esc(r.depart)+'</b><br>'+esc(r.name)).addTo(mMapLayer);
+      r.stops.forEach((s,si)=>{
+        const c=coordOf(s);
+        const mk=L.circleMarker(c,{radius:7,color:'#0B1220',weight:1.5,fillColor:stopDotColor(progress[s.id]),fillOpacity:.95})
+          .bindPopup('<b>'+esc(s.name)+'</b><br>'+esc(s.area)+' · '+s.eta+' 到站<br>'+s.items+'件 / '+s.weightKg+'kg · 格口 '+s.slots.join(' ')+'<br><span style="color:'+PROGRESS_DOT[progress[s.id]]+'">'+PROGRESS_LABEL[progress[s.id]]+'</span>'+(s.status==='broadcast'?' · 外溢广播':' · '+esc(STATUS[s.status].label))+'<br>'+(s.main?('主责：'+esc(s.main.name)):'无主责 · 外溢广播'))
+          .addTo(mMapLayer);
+        (vehStopMarkers[ri]=vehStopMarkers[ri]||[])[si]=mk;
+      });
+      /* 车辆实时位置（沿线路移动） */
+      const veh=VEHICLES[r.id];
+      if(veh){
+        const icon=L.divIcon({className:'veh-ic', html:vehMarkerHtml(veh.id, MLINE_COLORS[r.id]), iconSize:[30,30], iconAnchor:[15,15]});
+        vehAnimMarkers[ri]=L.marker(coordOf({id:'仓',name:r.depart}), {icon}).addTo(mMapLayer);
+      }
+    });
+    startVehicleAnim();
+    setTimeout(()=>{ if(mMap) mMap.invalidateSize(); },80);
+  };
+  if(typeof L==='undefined') loadLeaflet(doInit); else doInit();
+}
+
+/* ---------- 底图源配置弹窗 ---------- */
+function openMapCfg(){
+  const cur=loadTilePref();
+  const opts=TILE_SOURCES.map((s,i)=>'<button class="vm-cfg-opt'+(i===cur?' is-sel':'')+'" data-idx="'+i+'"><b>'+esc(s.name)+'</b><span>'+(/高德/.test(s.name)?'高德中文底图 · 无需Key':'备用底图源')+'</span></button>').join('');
+  openModal('底图源设置',
+    '<div class="vm-form">'
+    +'<p class="vm-cfg-tip">平台默认使用 <b>高德地图底图</b>（高德官方公开瓦片服务，中文底图、国内加载快、<b>无需 Key</b>）。如某底图源在你的网络下不可达，系统会自动切换下一个可用源，也可手动选择。</p>'
+    +'<div class="vm-cfg-opts">'+opts+'</div>'
+    +'<div class="vm-form-foot"><button class="vm-btn" onclick="closeModal()">取消</button><button class="vm-btn primary" id="cfSave">保存</button></div>'
+    +'</div>');
+  let picked=cur;
+  document.querySelectorAll('.vm-cfg-opt').forEach(b=>b.addEventListener('click',()=>{
+    document.querySelectorAll('.vm-cfg-opt').forEach(x=>x.classList.remove('is-sel'));
+    b.classList.add('is-sel'); picked=parseInt(b.dataset.idx,10);
+  }));
+  $('#cfSave').addEventListener('click',()=>{
+    saveTilePref(picked); tileSrcIdx=picked; tileErrCount=0;
+    closeModal(); renderM();
+    toast('已切换底图：'+TILE_SOURCES[picked].name);
+  });
+}
+
+/* ---------- 地图点选位置（站点表单用 · 独立叠加弹窗） ---------- */
+let pickModal=null, pickInstance=null;
+function closePick(){
+  if(pickModal) pickModal.classList.remove('open');
+  if(pickInstance){ try{ pickInstance.destroy(); }catch(e){} try{ pickInstance.remove(); }catch(e){} }
+  pickInstance=null;
+}
+function openPickMap(onPick, cur){
+  if(!pickModal){
+    pickModal=document.createElement('div'); pickModal.id='pickModal'; pickModal.className='vm-modal pick-modal';
+    pickModal.innerHTML='<div class="vm-modal-box"><div class="vm-modal-head"><b>在地图上点选站点位置</b><button class="vm-modal-x">'+ICONS.logout.replace('width="15"','width="13"')+'</button></div>'
+      +'<div class="vm-modal-body"><div class="vm-pick-tip">在地图上点击站点实际位置，弹窗自动关闭并回填坐标。</div>'
+      +'<div class="vm-map vm-pick-map" id="pickMap"></div>'
+      +'<div class="vm-form-foot"><button class="vm-btn" id="pickCancel">取消</button></div></div></div>';
+    document.body.appendChild(pickModal);
+    pickModal.addEventListener('click',e=>{ if(e.target===pickModal) closePick(); });
+    pickModal.querySelector('.vm-modal-x').addEventListener('click',closePick);
+    pickModal.querySelector('#pickCancel').addEventListener('click',closePick);
+  }
+  pickModal.classList.add('open');
+  setTimeout(()=>{
+    const box=$('#pickMap'); if(!box) return;
+    const doPick=(lat,lng)=>{ closePick(); onPick(lat,lng); toast('已选点：'+lat.toFixed(5)+', '+lng.toFixed(5)); };
+    const init=()=>{
+      if(typeof L==='undefined'){ box.innerHTML='<div class="vm-map-fail">地图组件加载失败：请检查网络后重试</div>'; return; }
+      const p=L.map('pickMap',{zoomControl:true}).setView(cur?[cur[0],cur[1]]:[26.60,106.66],13);
+      pickInstance=p;
+      addTileLayer(p);
+      if(cur){ L.circleMarker([cur[0],cur[1]],{radius:7,color:'#fff',weight:2,fillColor:'#2DD4BF',fillOpacity:1}).addTo(p); }
+      p.on('click', e=>{ doPick(e.latlng.lat, e.latlng.lng); });
+      setTimeout(()=>{ p.invalidateSize(); },80);
+    };
+    if(typeof L==='undefined') loadLeaflet(init); else init();
+  },80);
+}
+
+/* ============================================================
+   切换与初始化
+   ============================================================ */
+const VERSIONS={
+  a:{name:'A · 调度舱', hint:'平台调度运营视角 · 深色控制台，全链路监控确认状态与异常外溢'},
+  b:{name:'B · 企业工作台', hint:'货主企业视角 · 浅色 SaaS，任务安排、责任人确认与结算一屏管理'},
+  c:{name:'C · 履约现场', hint:'一线责任人视角 · 高对比操作台，确认接单到扫码签收全流程'},
+  m:{name:'M · 运营管理', hint:'平台配置视角 · 车辆、线路、人员与站点增删改查，地图总览'}
+};
+function switchVer(v){
+  state.ver=v;
+  document.querySelectorAll('.ver').forEach(m=>m.classList.toggle('is-active',m.dataset.ver===v));
+  document.querySelectorAll('.switcher__tab').forEach(t=>t.classList.toggle('is-active',t.dataset.v===v));
+  $('#verHint').textContent=VERSIONS[v].hint;
+  renderCurrent();
+}
+function renderCurrent(){
+  if(state.ver==='a') renderA();
+  else if(state.ver==='b') renderB();
+  else if(state.ver==='c') renderC();
+  else renderM();
+}
+
+/* ---------- 登录 / 角色进入 ---------- */
+function enterRole(v){
+  state.role=v;
+  $('#loginScreen').style.display='none';
+  $('#shell').style.display='flex';
+  switchVer(v);
+}
+function goLogin(){
+  state.role=null;
+  $('#loginScreen').style.display='flex';
+  $('#shell').style.display='none';
+}
+
+$('#swLogo').innerHTML='';
+$('#lgLogo').innerHTML='';
+document.querySelectorAll('.lr-ic').forEach(el=>{
+  const r=(el.className.match(/lr-([a-z])/)||[])[1]||'a';
+  el.innerHTML={a:ICONS.radar,b:ICONS.store,c:ICONS.hand,m:ICONS.settings}[r]||ICONS.truck;
+});
+document.querySelectorAll('.switcher__tab').forEach(t=>{
+  const v=t.dataset.v, ic={a:ICONS.radar,b:ICONS.store,c:ICONS.hand,m:ICONS.settings}[v]||ICONS.truck;
+  const dot=t.querySelector('.sw-dot'); if(dot) dot.remove();
+  const lbl=t.textContent.replace(/^\s*[A-Za-z]\s*·\s*/,'').trim();
+  t.innerHTML='<span class="sw-ic">'+ic+'</span><span>'+lbl+'</span>';
+});
+document.querySelectorAll('.switcher__tab').forEach(t=>t.addEventListener('click',()=>switchVer(t.dataset.v)));
+document.querySelectorAll('.login__role').forEach(b=>b.addEventListener('click',()=>{
+  const r=b.dataset.role;
+  const roleName={a:'调度运营台',b:'货主企业台',c:'责任人履约台',m:'运营管理台'}[r]||'系统';
+  enterRole(r);
+  toast('欢迎进入「'+roleName+'」· 数据为示例演示');
+}));
+$('#btnDemo').addEventListener('click',()=>{
+  enterRole('a'); state.role='demo';
+  toast('演示模式 · 顶部可自由切换三版');
+});
+$('#btnExit').addEventListener('click',()=>{ goLogin(); toast('已退出 · 请选择身份进入'); });
+
+const drawer=document.createElement('div');
+drawer.className='vb-drawer';
+drawer.id='drawer';
+drawer.innerHTML='<div class="vd-head"></div><div class="vd-body"></div>';
+document.body.appendChild(drawer);
+drawer.addEventListener('click',e=>{ if(e.target===drawer) drawer.classList.remove('open'); });
+
+/* 启动时尝试恢复本地持久化数据；支持 #a/#b/#c/#demo hash 直达对应角色 */
+const restored=loadPersist();
+const initHash=(location.hash||'').replace('#','');
+if(initHash==='a'||initHash==='b'||initHash==='c'||initHash==='m'){ enterRole(initHash); }
+else if(initHash==='demo'){ enterRole('a'); state.role='demo'; }
+else if(restored && state.ver && ['a','b','c','m'].includes(state.ver)){ enterRole(state.ver); }
+else { $('#loginScreen').style.display='flex'; $('#shell').style.display='none'; }
+</script>
+</body>
+</html>
