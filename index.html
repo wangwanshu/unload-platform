@@ -55,7 +55,7 @@ a{color:inherit;text-decoration:none}
 .va-vehicle .vv-v{font-size:13px;font-weight:800;color:#C7D5EC;margin-top:1px}
 .va-vehicle .vv-v.good{color:#2DD4BF}
 .va-vehicle .vv-v.warn{color:#F5A623}
-.va-countdown{display:flex;align-items:center;gap:8px;margin-left:auto;padding:8px 14px;border-radius:10px;background:rgba(245,165,35,.08);border:1px solid rgba(245,165,35,.35)}
+.va-countdown{display:flex;align-items:center;gap:10px;margin-left:auto;padding:8px 14px;border-radius:10px;background:rgba(245,165,35,.08);border:1px solid rgba(245,165,35,.35)}
 .va-countdown .cd-k{font-size:11px;color:#F5A623}
 .va-countdown .cd-v{font-size:15px;font-weight:900;color:#F5A623}
 .va-tabs{display:flex;gap:6px}
@@ -128,7 +128,7 @@ a{color:inherit;text-decoration:none}
 .person-card .pc-right .pc-score{font-size:12px;font-weight:800;color:#F5A623}
 .person-card .pc-right .pc-state{font-size:10px;color:#2DD4BF}
 
-.va-summary{padding:14px 22px;background:#0D1526;border-top:1px solid #1B2640;flex:0 0 auto;max-height:42%;overflow-y:auto}
+.va-summary{padding:14px 18px;background:#0D1526;border:1px solid #1B2640;border-radius:12px;margin-top:16px}
 .va-summary .vs-row{display:flex;align-items:center;gap:12px;margin-bottom:9px}
 .va-summary .vs-label{font-size:12px;color:#8CA3C3;flex:0 0 auto}
 .va-bar{flex:1 1 auto;height:8px;background:#141F38;border-radius:99px;overflow:hidden}
@@ -369,6 +369,19 @@ a{color:inherit;text-decoration:none}
 .ver-c .ver-banner .bn-tag{background:rgba(163,217,60,.14);color:#A3D93C}
 .ver-banner .bn-actions{margin-left:auto;display:flex;gap:8px}
 .ver-banner .bn-btn{font-size:11px;font-weight:700;padding:5px 12px;border-radius:7px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);color:currentColor}
+.va-simbtn{background:rgba(45,212,191,.12);border:1px solid rgba(45,212,191,.4);color:#2DD4BF;font-size:11px;font-weight:700;padding:5px 12px;border-radius:7px;cursor:pointer;white-space:nowrap}
+.va-countdown .va-simbtn{font-size:10.5px;padding:5px 10px}
+.va-simbtn:hover{background:rgba(45,212,191,.22)}
+.vs-taphint{display:none;margin-top:9px;font-size:11px;color:#2DD4BF;font-weight:700;letter-spacing:.3px}
+.a-modal-box{width:min(600px,96vw);max-height:90vh}
+.a-modal-body{overflow-y:auto}
+.modal-open{overflow:hidden}
+@media (max-width:760px){
+  .vs-taphint{display:block}
+  .a-modal-box{width:96vw;max-height:92vh}
+  .a-modal-body{padding:13px}
+  .a-modal-title{font-size:13px}
+}
 .ver-banner .bn-btn:hover{background:rgba(255,255,255,.12)}
 .toast{position:fixed;left:50%;bottom:30px;transform:translateX(-50%) translateY(20px);opacity:0;pointer-events:none;background:#101418;color:#EDF2F5;border:1px solid #2A3642;padding:12px 20px;border-radius:10px;font-size:13px;font-weight:600;box-shadow:0 12px 30px -12px rgba(0,0,0,.5);transition:.25s;z-index:99;max-width:480px}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
@@ -400,6 +413,10 @@ a{color:inherit;text-decoration:none}
 .login__demo:hover{color:#2DD4BF;border-color:#2DD4BF;background:#0F1930}
 /* 顶部切换角色按钮 */
 .switcher__exit{padding:8px 14px;border-radius:9px;font-size:12px;font-weight:700;color:#D6E2F5;background:#16203A;border:1px solid #2A3A5C;flex:0 0 auto;transition:.16s}
+.switcher__right{display:flex;align-items:center;gap:8px;flex:0 0 auto;margin-left:14px}
+.switcher__tabs{margin-left:auto}
+.switcher__reset{font-size:11px;font-weight:700;padding:7px 12px;border-radius:9px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.14);color:#8CA3C3;cursor:pointer;flex:0 0 auto;white-space:nowrap}
+.switcher__reset:hover{border-color:#F0565B;color:#F0565B}
 .switcher__exit:hover{border-color:#2DD4BF;color:#2DD4BF}
 /* 版本号徽标 */
 .v-badge{display:inline-block;margin-left:7px;padding:2px 8px;border-radius:99px;font-size:10px;font-weight:800;letter-spacing:.6px;background:linear-gradient(135deg,#2DD4BF,#17B8A6);color:#07251F;vertical-align:1px;font-family:'JetBrains Mono',Consolas,monospace}
@@ -654,6 +671,30 @@ a{color:inherit;text-decoration:none}
 .st-badge.no{background:rgba(240,86,91,.15);color:#F0565B;border:1px solid rgba(240,86,91,.35)}
 .st-badge.wait{background:rgba(250,173,20,.15);color:#F5A623;border:1px solid rgba(250,173,20,.35)}
 .iv-ghost{background:transparent;border:1px solid #22304F;color:#8CA3C3;border-radius:9px;padding:9px;font-size:13px;cursor:pointer;width:100%;margin-top:8px}
+@media (max-width:400px){
+  .va-vehicle .vv-cell{flex:1 1 45%}
+  .sh-cell{flex:1 1 40%}
+  .vm-nav{flex:1 1 45%;justify-content:center}
+  .vm-navs{gap:4px}
+  .inv-kpi{padding:10px}
+  .switcher__tabs .switcher__tab{font-size:11px;padding:7px 4px}
+  .vm-stop .vs-seq{width:22px;height:22px;font-size:11px}
+}
+.vm-toolbar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:14px}
+.imp-wrap{display:flex;flex-direction:column;gap:14px}
+.imp-step b{color:#D6E2F5;font-size:13px;display:block;margin-bottom:4px}
+.imp-step p{color:#8CA3C3;font-size:12px;line-height:1.6;margin:4px 0 8px}
+.imp-note{font-size:11px;color:#5F769A}
+.imp-tip{margin-top:6px;font-size:12px}
+.imp-err{color:#F0565B;font-size:12px}
+.imp-ok{color:#34C759;font-size:12px}
+.imp-prev-h{color:#D6E2F5;font-size:13px;margin:4px 0 8px}
+.imp-table{max-height:240px;overflow:auto;border:1px solid #1E2B48;border-radius:9px}
+.imp-table table{width:100%;border-collapse:collapse;font-size:12px}
+.imp-table th{background:#0B1426;color:#8CA3C3;padding:7px 8px;text-align:left;position:sticky;top:0}
+.imp-table td{padding:6px 8px;border-top:1px solid #16203A;color:#C6D4EA}
+.imp-bad td{background:rgba(240,86,91,.06)}
+.imp-go{width:100%;margin-top:12px}
 .iv-ok{display:flex;flex-direction:column;align-items:center;gap:10px;text-align:center;padding:22px 8px}
 .iv-okic{width:54px;height:54px;border-radius:50%;background:rgba(45,212,191,.16);border:1px solid rgba(45,212,191,.6);color:#7DF0E4;font-size:26px;display:grid;place-items:center}
 .iv-ok b{font-size:16px;color:#E8F0FB}
@@ -733,6 +774,9 @@ a{color:inherit;text-decoration:none}
 }
 @media (max-width:760px){
   body{font-size:14px}
+  .ver-banner{flex-wrap:wrap}
+  .ver-banner .bn-actions{margin-left:auto}
+  .switcher__right{margin-left:auto;width:auto;justify-content:flex-end}
   /* 顶部 */
   .switcher{padding:9px 12px;gap:10px;flex-wrap:wrap}
   .switcher__brand .switcher__sub{display:none}
@@ -784,8 +828,47 @@ a{color:inherit;text-decoration:none}
   .rp-rn{width:96px}
   .vm-map-bar .vm-btn{margin-left:0}
 }
+
 @media (max-width:520px){
   .login__card{padding:24px 16px 20px}
+  /* A版固定条手机紧凑 */
+  .va-top{gap:8px}
+  .va-tab{padding:6px 10px;font-size:12px}
+  .va-countdown{padding:6px 10px;width:100%;margin-left:0;justify-content:space-between}
+  .va-countdown .cd-k{font-size:10px}
+  .va-countdown .cd-v{font-size:15px}
+  .va-window{padding:6px 9px;font-size:10px}
+  .va-date{font-size:11px}
+  .va-countdown .va-simbtn{flex:0 0 auto}
+  /* 窄屏通用加固 */
+  .inv-kpis{grid-template-columns:repeat(2,1fr);gap:8px}
+  .inv-funnel{flex-wrap:wrap}
+  .inv-funnel i{flex:1 1 45%;margin:2px 0}
+  .vm-card-head{flex-wrap:wrap;gap:8px}
+  .vm-ops{flex-wrap:wrap}
+  .vm-modal-box{max-height:92vh}
+  .vm-modal-body{padding:14px}
+  .vb-form .f-row{grid-template-columns:1fr}
+  .vm-map-bar{flex-wrap:wrap}
+  .rp-days{overflow-x:auto;justify-content:flex-start}
+  .rp-day{min-width:40px;flex:0 0 auto}
+  .iv-rmap-box{height:210px}
+  .pick-modal .vm-modal-box{height:auto;max-height:88vh}
+  .va-metrics{grid-template-columns:repeat(2,1fr)}
+  .vc-me{flex-wrap:wrap}
+  .vc-ops .vo-step{min-width:0;flex-wrap:wrap}
+  .imp-table th,.imp-table td{padding:5px 6px;font-size:11px}
+  .rp-kpis{grid-template-columns:repeat(2,1fr)}
+  .switcher__brand .switcher__title{font-size:14px}
+  .switcher__logo{width:34px;height:34px;border-radius:10px}
+  .switcher__exit,.switcher__reset{padding:6px 9px;font-size:10.5px}
+  .vm-nav{padding:8px 10px;font-size:12px}
+  .vm-meta{font-size:11px}
+  .vm-meta span{white-space:nowrap}
+  .route-head{flex-wrap:wrap}
+  .vm-stop .vs-main{min-width:0}
+  .vm-stop .vs-main .t-muted{white-space:normal;line-height:1.5}
+  .bn-tag{max-width:100%}
   .login__role{flex-wrap:wrap}
   .lr-tags{max-width:100%;margin-left:0}
   .lr-desc{flex:1 1 100%;min-height:0}
@@ -877,14 +960,16 @@ a{color:inherit;text-decoration:none}
         <div class="switcher__sub">B端配送 · 人车接力 · 确定性卸货</div>
       </div>
     </div>
+    <div class="switcher__right">
+      <button class="switcher__reset" id="btnReset" title="恢复演示示例数据（正式发布前删除）">重置演示</button>
+      <button class="switcher__exit" id="btnExit">切换角色 <span class="v-badge" id="vBadge"></span></button>
+    </div>
     <nav class="switcher__tabs" id="verTabs">
       <button class="switcher__tab is-active" data-v="a"><span class="sw-dot"></span>A · 调度舱</button>
       <button class="switcher__tab" data-v="b"><span class="sw-dot"></span>B · 企业工作台</button>
       <button class="switcher__tab" data-v="c"><span class="sw-dot"></span>C · 履约现场</button>
       <button class="switcher__tab" data-v="m"><span class="sw-dot"></span>M · 运营管理</button>
     </nav>
-    <div class="switcher__hint" id="verHint">平台调度运营视角 · 深色控制台，全链路监控确认状态</div>
-    <button class="switcher__exit" id="btnExit">切换角色 <span class="v-badge" id="vBadge"></span></button>
   </header>
 
   <main class="ver ver-a is-active" id="verA" data-ver="a"></main>
@@ -984,6 +1069,12 @@ a{color:inherit;text-decoration:none}
       <div id="ivQRes"></div>
       <button class="iv-ghost" id="ivQBack">返回</button>
     </div>
+  </div>
+</div>
+<div class="vm-modal" id="aStopModal">
+  <div class="vm-modal-box a-modal-box">
+    <div class="vm-modal-head"><span class="a-modal-title">停靠点详情</span><button class="vm-modal-x" id="aModalClose" title="关闭">×</button></div>
+    <div class="vm-modal-body a-modal-body" id="aModalBody"></div>
   </div>
 </div>
 <div class="toast" id="toast"></div>
@@ -1159,7 +1250,7 @@ const state = {
 let seq = 100;
 
 /* 版本号：每轮迭代更新此常量，顶栏徽标与登录页自动同步 */
-const APP_VERSION = 'V17';
+const APP_VERSION = 'V23';
 /* 当日班次即时确认限时（分钟），超时自动升级备选 / 外溢 */
 const URGENT_CONFIRM_MIN = 30;
 
@@ -1317,74 +1408,23 @@ function countdownToDeadline(){
   return h+':'+m;
 }
 let selStopCache = null;
-function renderA(){
-  const host = $('#verA');
-  const route = ROUTES.find(r=>r.id===state.route);
-  const veh = VEHICLES[route.id] || {id:'未分配', plate:'--', battery:0, loadRate:0, status:'--', model:''};
-  const stop = selStopCache || stopById(state.selStop) || route.stops[0];
-  selStopCache = stop;
-
-  const stopsHtml = route.stops.map((s,idx)=>{
-    const person = s.main
-      ? '<div class="vs-person"><span class="pf">'+ICONS.user+'</span><span>'+esc(s.main.name)+' · '+esc(s.main.role)+(s.main.confirmed?'':'（待确认）')+'</span></div>'
-      : '<div class="vs-person vs-none">'+ICONS.user+' 暂无绑定 · 等待外溢</div>';
-    return '<div class="va-stop'+(s.id===stop.id?' is-sel':'')+'" data-stop="'+s.id+'">'
-      +'<div class="vs-head"><span class="vs-eta">'+s.eta+'</span><span class="vs-seq">'+(idx+1)+'</span></div>'
-      +'<div class="vs-name">'+esc(s.name)+'</div>'
-      +'<div class="vs-area">'+esc(s.area)+' · '+esc(s.kind)+'</div>'
-      +'<div class="vs-load"><span>'+ICONS.box+s.items+' 件</span><span>'+ICONS.truck+s.weightKg+'kg</span>'
-      +'<span style="color:'+PROGRESS_DOT[progress[s.id]]+'">'+PROGRESS_LABEL[progress[s.id]]+'</span>'
-      +'<span>'+ICONS.clock+s.estMin+'min</span></div>'
-      +'<div class="vs-slots">'+slotChips(s)+'</div>'
-      +person+'</div>';
-  }).join('');
-
-  /* 装车清单：G1-G12，标记当前线路各站占用 */
-  const used = {};
-  route.stops.forEach(s=>(s.slots||[]).forEach(g=>used[g]=s.name));
-  const manifestHtml = Array.from({length:12},(_,i)=>{
-    const g = 'G'+(i+1);
-    const owner = used[g];
-    return '<div class="vm-cell'+(owner?' has':' free')+'" title="'+esc(owner||'空闲')+'">'+g+(owner?'':'·')+'</div>';
-  }).join('');
-
-  const confirmedMain = allStops().filter(s=>s.main && s.main.confirmed).length;
-  const total = allStops().length;
-  const pct = Math.round(confirmedMain/total*100);
-  const alerts = allStops().filter(s=>s.status==='escalated'||s.status==='broadcast');
-  const alertHtml = alerts.map(s=>'<div class="va-alert '+(s.status==='broadcast'?'bad':'warn')+'">'
+function todayCN(){ const d=new Date(); const wd=['日','一','二','三','四','五','六'][d.getDay()]; return (d.getMonth()+1)+'月'+d.getDate()+'日 · 周'+wd; }
+function aStopMetrics(route){
+  const confirmed = route.stops.filter(s=>s.main && s.main.confirmed).length;
+  const total = route.stops.length;
+  return { confirmed:confirmed, total:total, pct: total? Math.round(confirmed/total*100):0, alerts: route.stops.filter(s=>s.status==='escalated'||s.status==='broadcast') };
+}
+function buildADetail(stop){
+  const route=ROUTES.find(r=>r.id===state.route);
+  const veh=VEHICLES[route.id]||{id:'未分配',plate:'--',battery:0,loadRate:0,status:'--',model:''};
+  const m=aStopMetrics(route);
+  const issueHtml = stop.issues.length ? stop.issues.map(iss=>'<div class="issue-banner">'+ICONS.alert
+    +'<div><b>'+esc(iss.type)+' · '+esc(iss.status)+'</b><div style="margin-top:2px">'+esc(iss.desc)+' · '+esc(iss.t)+'</div></div></div>').join('') : '';
+  const alertHtml = m.alerts.map(s=>'<div class="va-alert '+(s.status==='broadcast'?'bad':'warn')+'">'
     +'<span class="al-dot" style="background:'+STATUS[s.status].dot+'"></span>'
     +'<span class="al-msg">'+esc(s.name)+' · '+STATUS[s.status].label+'</span>'
     +'<span class="al-tag">'+esc(s.eta)+'</span></div>').join('') || '<div style="color:#3E5A8C;font-size:12px;padding:6px 2px">全部停靠点已就绪</div>';
-
-  const issueHtml = stop.issues.length ? stop.issues.map(iss=>'<div class="issue-banner">'+ICONS.alert
-    +'<div><b>'+esc(iss.type)+' · '+esc(iss.status)+'</b><div style="margin-top:2px">'+esc(iss.desc)+' · '+esc(iss.t)+'</div></div></div>').join('') : '';
-
-  host.innerHTML =
-    '<div class="ver-banner"><span class="bn-tag">'+ICONS.radar+'A · 调度舱</span>'
-    +'平台调度运营视角 · 全链路监控停靠点确认状态，前一晚 22:00 前完成主责绑定，异常自动外溢'
-    +'<span class="bn-actions"><button class="bn-btn" id="aSimConfirm">模拟进入今晚确认窗口</button>'
-    +'<button class="bn-btn" id="aReset">重置演示</button></span></div>'
-    +'<div class="va-top">'
-    +'<div><h1>'+esc(route.name)+'</h1><div class="va-date">今日 '+route.stops.length+' 站 · '+esc(route.depart)+' '+route.etd+' 发车 · 数据为示例演示</div></div>'
-    +'<div class="va-vehicle">'
-    +'<div class="vv-cell"><div class="vv-k">车辆</div><div class="vv-v">'+veh.id+'</div></div>'
-    +'<div class="vv-cell"><div class="vv-k">车牌</div><div class="vv-v mono">'+veh.plate+'</div></div>'
-    +'<div class="vv-cell"><div class="vv-k">电量</div><div class="vv-v '+(veh.battery<70?'warn':'good')+'">'+veh.battery+'%</div></div>'
-    +'<div class="vv-cell"><div class="vv-k">装载率</div><div class="vv-v">'+Math.round(veh.loadRate*100)+'%</div></div>'
-    +'</div>'
-    +'<div class="va-countdown"><div><div class="cd-k">距今晚确认截止</div><div class="cd-v">'+countdownToDeadline()+'</div></div></div>'
-    +'<div class="va-tabs">'+ROUTES.map(r=>'<button class="va-tab'+(r.id===state.route?' is-active':'')+'" data-route="'+r.id+'">'+esc(r.name)+'</button>').join('')+'</div>'
-    +'<div class="va-window"><b>'+confirmedMain+'/'+total+'</b>主责锁定</div>'
-    +'</div>'
-    +'<div class="va-body">'
-    +'<div class="va-track">'
-    +'<h2>'+ICONS.route+' 到站时序 · '+esc(route.name)+'　<span class="mono">'+esc(route.depart)+' →</span></h2>'
-    +'<div class="va-rail">'+stopsHtml+'</div>'
-    +'<div class="va-manifest"><h4>'+ICONS.grid+' 车辆 '+veh.id+' 货物装载图 · 按停靠站分配</h4><div class="vm-grid">'+manifestHtml+'</div></div>'
-    +'</div>'
-    +'<div class="va-side">'
-    +'<div class="va-detail">'
+  return '<div class="va-detail">'
     +issueHtml
     +'<h3>'+esc(stop.name)+' '+statusPill(stop.status)+'</h3>'
     +'<div class="vd-sub">'+esc(stop.area)+' · '+esc(stop.kind)+' · ETA '+stop.eta+' · 卸货预计 '+stop.estMin+' 分钟 · '+PROGRESS_LABEL[progress[stop.id]]+'</div>'
@@ -1409,27 +1449,20 @@ function renderA(){
         : '<button class="btn btn-ghost" data-a-act="markdone">标记今日已卸货</button>')
     +((stop.shift==='today'&&(stop.status==='escalated'||stop.status==='partial'))?'<button class="btn btn-ghost" data-a-act="simtimeout">'+ICONS.clock+' 模拟确认超时</button>':'')
     +'</div>'
-    +'</div>'
     +'<div class="va-summary">'
-    +'<div class="vs-row"><span class="vs-label">今晚主责确认进度</span><div class="va-bar"><i style="width:'+pct+'%"></i></div><span class="vs-num">'+confirmedMain+'/'+total+' · '+pct+'%</span></div>'
+    +'<div class="vs-row"><span class="vs-label">今晚主责确认进度</span><div class="va-bar"><i style="width:'+m.pct+'%"></i></div><span class="vs-num">'+m.confirmed+'/'+m.total+' · '+m.pct+'%</span></div>'
     +'<div class="va-metrics">'
     +'<div class="va-metric"><div class="vm-k">今日准点率</div><div class="vm-v good">98.2%</div></div>'
     +'<div class="va-metric"><div class="vm-k">本周SLA履约</div><div class="vm-v">99.1%</div></div>'
     +'<div class="va-metric"><div class="vm-k">本月赔付</div><div class="vm-v warn">2 笔</div></div>'
     +'</div>'
-    +'<div class="vs-label" style="margin-bottom:7px">需要处理的异常停靠点（'+alerts.length+'）</div>'
+    +'<div class="vs-label" style="margin-bottom:7px">需要处理的异常停靠点（'+m.alerts.length+'）</div>'
     +'<div class="va-alerts">'+alertHtml+'</div>'
     +'</div>'
-    +'</div>'
     +'</div>';
-
-  host.querySelectorAll('[data-stop]').forEach(el=>el.addEventListener('click',()=>{ state.selStop=el.dataset.stop; selStopCache=stopById(state.selStop); renderA(); }));
-  host.querySelectorAll('[data-route]').forEach(el=>el.addEventListener('click',()=>{
-    state.route=el.dataset.route;
-    const r=ROUTES.find(x=>x.id===state.route);
-    state.selStop=r.stops[0].id; selStopCache=null; renderA();
-  }));
-  host.querySelectorAll('[data-a-act]').forEach(el=>el.addEventListener('click',()=>{
+}
+function bindStopActions(root){
+  root.querySelectorAll('[data-a-act]').forEach(el=>el.addEventListener('click',()=>{
     const s=stopById(state.selStop); const act=el.dataset.aAct;
     if(act==='assign'){ s.main={name:'驻点临时工',role:'平台指派',confirmed:true,score:4.2,phone:'190****0001'}; s.backup=[{name:'附近零工',role:'待命',confirmed:true,score:4.0}]; s.status='ready'; addLog(s,'平台指派片区驻点，站点恢复就绪'); toast('已指派驻点，'+s.name+' 恢复就绪'); }
     if(act==='recheck'){ s.status='escalated'; if(s.main) s.main.confirmed=false; s.backup.forEach(b=>b.confirmed=false); addLog(s,'重新发起确认，等待责任人响应'); toast('已重新发起确认'); }
@@ -1439,9 +1472,82 @@ function renderA(){
     if(act==='confbackup'){ if(!s.backup.length) s.backup=[{name:'片区备选',role:'备选',confirmed:true,score:4.2}]; s.backup.forEach(b=>b.confirmed=true); s.status='ready'; s.urgentDeadline=null; addLog(s,'备选确认到位，站点就绪'); toast(s.name+' 备选已确认，站点就绪'); }
     if(act==='simtimeout'){ if(s.shift==='today'&&s.urgentDeadline){ s.urgentDeadline=Date.now()-1; checkUrgentFlow(); } renderA(); return; }
     renderA();
+    if($('#aStopModal') && $('#aStopModal').style.display==='flex') openStopModal();
   }));
+}
+function openStopModal(){
+  const s=selStopCache||stopById(state.selStop)||ROUTES.find(r=>r.id===state.route).stops[0];
+  state.selStop=s.id; selStopCache=s;
+  const box=$('#aModalBody'); if(!box) return;
+  box.innerHTML=buildADetail(s);
+  bindStopActions(box);
+  $('#aStopModal').style.display='flex';
+  document.body.classList.add('modal-open');
+}
+function closeStopModal(){
+  const mm=$('#aStopModal'); if(mm) mm.style.display='none';
+  document.body.classList.remove('modal-open');
+}
+(function(){
+  const mc=$('#aModalClose'); if(mc) mc.addEventListener('click',closeStopModal);
+  const mm=$('#aStopModal'); if(mm) mm.addEventListener('click',e=>{ if(e.target===mm) closeStopModal(); });
+})();
+function renderA(){
+  const host = $('#verA');
+  const route = ROUTES.find(r=>r.id===state.route);
+  const veh = VEHICLES[route.id] || {id:'未分配', plate:'--', battery:0, loadRate:0, status:'--', model:''};
+  const stop = selStopCache || stopById(state.selStop) || route.stops[0];
+  selStopCache = stop;
+  const m = aStopMetrics(route);
+  const isMobile = window.innerWidth < 760;
+
+  const stopsHtml = route.stops.map((s,idx)=>{
+    const person = s.main
+      ? '<div class="vs-person"><span class="pf">'+ICONS.user+'</span><span>'+esc(s.main.name)+' · '+esc(s.main.role)+(s.main.confirmed?'':'（待确认）')+'</span></div>'
+      : '<div class="vs-person vs-none">'+ICONS.user+' 暂无绑定 · 等待外溢</div>';
+    return '<div class="va-stop'+(s.id===stop.id?' is-sel':'')+'" data-stop="'+s.id+'">'
+      +'<div class="vs-head"><span class="vs-eta">'+s.eta+'</span><span class="vs-seq">'+(idx+1)+'</span></div>'
+      +'<div class="vs-name">'+esc(s.name)+'</div>'
+      +'<div class="vs-area">'+esc(s.area)+' · '+esc(s.kind)+'</div>'
+      +'<div class="vs-load"><span>'+ICONS.box+s.items+' 件</span><span>'+ICONS.truck+s.weightKg+'kg</span>'
+      +'<span style="color:'+PROGRESS_DOT[progress[s.id]]+'">'+PROGRESS_LABEL[progress[s.id]]+'</span>'
+      +'<span>'+ICONS.clock+s.estMin+'min</span></div>'
+      +'<div class="vs-slots">'+slotChips(s)+'</div>'
+      +person
+      +(isMobile?'<div class="vs-taphint">点击查看详情 ›</div>':'')+'</div>';
+  }).join('');
+
+
+  host.innerHTML =
+    '<div class="va-top">'
+    +'<div><h1>'+esc(route.name)+'</h1><div class="va-date">'+todayCN()+' · 今日 '+route.stops.length+' 站 · '+esc(route.depart)+' '+route.etd+' 发车</div></div>'
+    +'<div class="va-vehicle">'
+    +'<div class="vv-cell"><div class="vv-k">车辆</div><div class="vv-v">'+veh.id+'</div></div>'
+    +'<div class="vv-cell"><div class="vv-k">车牌</div><div class="vv-v mono">'+veh.plate+'</div></div>'
+    +'<div class="vv-cell"><div class="vv-k">电量</div><div class="vv-v '+(veh.battery<70?'warn':'good')+'">'+veh.battery+'%</div></div>'
+    +'<div class="vv-cell"><div class="vv-k">装载率</div><div class="vv-v">'+Math.round(veh.loadRate*100)+'%</div></div>'
+    +'</div>'
+    +'<div class="va-countdown"><button class="bn-btn va-simbtn" id="aSimConfirm">模拟进入今晚确认窗口</button><div><div class="cd-k">距今晚确认截止</div><div class="cd-v">'+countdownToDeadline()+'</div></div></div>'
+    +'<div class="va-tabs">'+ROUTES.map(r=>'<button class="va-tab'+(r.id===state.route?' is-active':'')+'" data-route="'+r.id+'">'+esc(r.name)+'</button>').join('')+'</div>'
+    +'<div class="va-window"><b>'+m.confirmed+'/'+m.total+'</b>主责锁定</div>'
+    +'</div>'
+    +'</div>'
+    +'<div class="va-body">'
+    +'<div class="va-track">'
+    +'<h2>'+ICONS.route+' 到站时序 · '+esc(route.name)+'　<span class="mono">'+esc(route.depart)+' →</span></h2>'
+    +'<div class="va-rail">'+stopsHtml+'</div>'
+    +'</div>'
+    +(isMobile?'':'<div class="va-side">'+buildADetail(stop)+'</div>')
+    +'</div>';
+
+  host.querySelectorAll('[data-stop]').forEach(el=>el.addEventListener('click',()=>{ state.selStop=el.dataset.stop; selStopCache=stopById(state.selStop); if(window.innerWidth<760){ openStopModal(); } else { renderA(); } }));
+  host.querySelectorAll('[data-route]').forEach(el=>el.addEventListener('click',()=>{
+    state.route=el.dataset.route;
+    const r=ROUTES.find(x=>x.id===state.route);
+    state.selStop=r.stops[0].id; selStopCache=null; renderA();
+  }));
+  bindStopActions(host);
   $('#aSimConfirm').addEventListener('click',()=>toast('已模拟进入今晚确认窗口（21:00–22:00）：系统自动向全部主责与备选发送确认单，未确认单将升级或外溢'));
-  $('#aReset').addEventListener('click',()=>{ resetDemoData(); renderA(); toast('已重置演示数据'); });
   clearInterval(window._cdTimer);
   const cdEl=host.querySelector('.cd-v');
   if(cdEl){ cdEl.textContent=countdownToDeadline(); window._cdTimer=setInterval(()=>{ if(cdEl.isConnected) cdEl.textContent=countdownToDeadline(); },30000); }
@@ -1892,10 +1998,7 @@ function renderC(){
   }
 
   host.innerHTML=
-    '<div class="ver-banner"><span class="bn-tag">'+ICONS.hand+'C · 履约现场</span>'
-    +'一线责任人视角 · 确认接单、扫码开箱、卸货签收全流程演示，操作会实时推进状态'
-    +'<span class="bn-actions"><button class="bn-btn" id="cReset">重置演示</button></span></div>'
-    +'<div class="vc-top">'
+    '<div class="vc-top">'
     +'<div class="vc-me"><span class="vc-avatar">陈</span><div><b>'+WORKER.name+'</b><span>'+WORKER.role+' · '+WORKER.area+' · 信用分 '+WORKER.score.toFixed(1)+' · 连续履约 '+WORKER.streak+' 天</span></div></div>'
     +'<span class="vc-badge">'+ICONS.check+' 今晚已确认 '+MINE.filter(m=>progress[m.stopId]!=='pending').length+'/'+MINE.length+'</span>'
     +'<div class="vc-shift">'
@@ -1943,7 +2046,6 @@ function renderC(){
     }
     renderC();
   }));
-  $('#cReset').addEventListener('click',()=>{ resetProgressDefault(); restoreDemoBinding(); state.cIssueOpen=false; renderC(); toast('已重置演示进度'); });
   persist();
 }
 
@@ -2143,10 +2245,7 @@ function renderM(){
   else body=mStaffHtml();
 
   host.innerHTML=
-    '<div class="ver-banner vm-banner"><span class="bn-tag">'+ICONS.settings+'M · 运营管理</span>'
-    +'平台配置视角 · 车辆 / 线路 / 人员 / 站点增删改查，地图总览一屏掌控'
-    +'<span class="bn-actions"><button class="bn-btn" id="mReset">恢复示例数据</button></span></div>'
-    +'<div class="vm-top"><nav class="vm-navs">'+nav+'</nav>'
+    '<div class="vm-top"><nav class="vm-navs">'+nav+'</nav>'
     +'<div class="vm-meta"><button class="m-bell" id="mBell" title="待审核提醒（点击前往人员管理）"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg><b class="m-belln" id="mBellN" style="display:none">0</b></button><span>'+ROUTES.length+' 条线路</span><span>'+stopCount+' 个站点</span><span>'+vehCount+' 台车辆</span><span>'+STAFF.length+' 名责任人</span>'
     +ROUTES.map(r=>'<span><i class="vm-mdot" style="background:'+MLINE_COLORS[r.id]+'"></i>'+esc(r.name)+' '+r.stops.length+' 站</span>').join('')
     +'<span><i class="vm-mdot" style="background:#8CA3C3"></i>分拣仓</span></div></div>'
@@ -2154,7 +2253,6 @@ function renderM(){
 
   host.querySelectorAll('[data-mnav]').forEach(el=>el.addEventListener('click',()=>{ state.mNav=el.dataset.mnav; renderM(); }));
   host.querySelectorAll('[data-rtoggle]').forEach(el=>el.addEventListener('click',e=>{ if(e.target.closest('[data-mact]')) return; el.closest('.vm-route-card').classList.toggle('is-open'); }));
-  $('#mReset').addEventListener('click',resetDemoData);
   const mb=document.getElementById('mBell'); if(mb) mb.addEventListener('click',()=>{ state.mNav='staff'; renderM(); });
   updateMBell();
   bindM();
@@ -2196,7 +2294,8 @@ function mVehicleHtml(){
     +(rows||'<tr><td colspan="7" class="vm-empty-td">暂无车辆，点击右上角「新增车辆」</td></tr>')+'</tbody></table></div></div>';
 }
 function mRouteHtml(){
-  return ROUTES.map(r=>{
+  return '<div class="vm-toolbar"><button class="vm-btn primary" data-mact="importStops"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M7 10l5 5 5-5"/><path d="M12 15V3"/></svg> 批量导入站点</button><span class="vm-hint">停靠点较多时，用 Excel/CSV 批量导入更快（点此下载模板）</span></div>'
+    +ROUTES.map(r=>{
     const stops=r.stops.map((s,i)=>{
       return '<div class="vm-stop"><span class="vs-seq">'+(i+1)+'</span>'
         +'<div class="vs-main"><b>'+esc(s.name)+'</b><span class="t-muted">'+esc(s.area)+' · '+s.eta+' 到站 · '+s.items+'件/'+s.weightKg+'kg · 标识 '+s.slots.join(' ')+' · '+(s.main?('主责 '+esc(s.main.name)):'外溢广播')+'</span></div>'
@@ -2372,6 +2471,7 @@ function bindM(){
     else if(act==='delVehicle') confirmDel('vehicle', id);
     else if(act==='addRoute') openRouteForm();
     else if(act==='editRoute') openRouteForm(id);
+    else if(act==='importStops') openImportModal();
     else if(act==='addStop') openStopForm(id);
     else if(act==='editStop') openStopForm(rid, sid);
     else if(act==='delStop') confirmDel('stop', rid+'|'+sid);
@@ -2389,6 +2489,130 @@ function bindM(){
   if(state.mNav==='staff'&&SUPA_ON) setTimeout(refreshRemoteInvites,120);
 }
 
+/* ---- 线路站点批量导入 ---- */
+function parseCSV(text){
+  const rows=[]; let row=[], cur='', q=false;
+  for(let i=0;i<text.length;i++){
+    const c=text[i];
+    if(q){ if(c==='"'){ if(text[i+1]==='"'){ cur+='"'; i++; } else q=false; } else cur+=c; }
+    else if(c==='"') q=true;
+    else if(c===','){ row.push(cur); cur=''; }
+    else if(c==='\n'){ row.push(cur); rows.push(row); row=[]; cur=''; }
+    else if(c==='\r'){}
+    else cur+=c;
+  }
+  if(cur!==''||row.length){ row.push(cur); rows.push(row); }
+  return rows;
+}
+function loadSheetJS(cb){
+  if(window.XLSX){ cb&&cb(); return; }
+  const s=document.createElement('script');
+  s.src='https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js';
+  s.onload=()=>cb&&cb();
+  s.onerror=()=>{ cb&&cb(true); };
+  document.head.appendChild(s);
+}
+function downloadRouteTemplate(){
+  const csv='线路ID,站点名称,所在区域,货物标识,预计到站,货量,重量KG,卸货时长分钟,经度,纬度,备注\n'
+    +'R2,示例店A,南明区,整箱·生鲜|整箱·日配,07:30,30,400,15,106.680,26.560,备注示例\n'
+    +'R2,示例店B,南明区,整箱·日配,07:50,18,220,10,,,\n';
+  const blob=new Blob(['\ufeff'+csv],{type:'text/csv;charset=utf-8'});
+  const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='线路站点批量导入模板.csv'; a.click();
+}
+function routeMatch(k){
+  if(!k) return null;
+  k=String(k).trim().toUpperCase();
+  if(/^R\d+$/.test(k)) return ROUTES.find(r=>r.id.toUpperCase()===k);
+  return ROUTES.find(r=>r.name===String(k).trim());
+}
+function openImportModal(){
+  const rOpts=ROUTES.map(r=>'<option value="'+r.id+'">'+esc(r.name)+'（'+r.stops.length+' 站）</option>').join('');
+  openModal('批量导入停靠点',
+    '<div class="imp-wrap">'
+    +'<div class="imp-step"><b>① 下载模板</b><p>按模板填写停靠点；模板首行即表头，可自行增删行。货物标识用 | 分隔多个（如 整箱·生鲜|整箱·日配）。</p><button class="vm-btn primary" id="impDl">下载模板 CSV</button></div>'
+    +'<div class="imp-step"><b>② 选择目标线路</b><select id="impRoute">'+rOpts+'</select><p class="imp-note">CSV 中「线路ID」列可覆盖此选择（R1/R2/R3 或线路名均可）。</p></div>'
+    +'<div class="imp-step"><b>③ 选择文件导入</b><input type="file" id="impFile" accept=".csv,.xlsx,.xls"><div id="impTip" class="imp-tip"></div></div>'
+    +'<div id="impPrev"></div>'
+    +'</div>'
+  );
+  $('#impDl').addEventListener('click',downloadRouteTemplate);
+  const fi=$('#impFile');
+  fi.addEventListener('change',()=>{
+    const f=fi.files[0]; if(!f) return;
+    const rd=rows=>{
+      if(!rows.length||rows.length<2){ $('#impTip').innerHTML='<span class="imp-err">文件为空或缺少数据行</span>'; return; }
+      handleImportRows(rows);
+    };
+    if(/.(csv)$/i.test(f.name)){
+      const r=new FileReader(); r.onload=e=>rd(parseCSV(e.target.result)); r.readAsText(f);
+    } else {
+      const r=new FileReader();
+      r.onload=e=>{ loadSheetJS(err=>{
+        if(err||!window.XLSX){ $('#impTip').innerHTML='<span class="imp-err">Excel 解析库加载失败，请将表格另存为 CSV（UTF-8）再导入</span>'; return; }
+        try{
+          const wb=XLSX.read(e.target.result,{type:'array'});
+          const ws=wb.Sheets[wb.SheetNames[0]];
+          const arr=XLSX.utils.sheet_to_json(ws,{header:1,raw:false,defval:''});
+          rd(arr);
+        }catch(ex){ $('#impTip').innerHTML='<span class="imp-err">Excel 解析失败，请另存为 CSV 再试</span>'; }
+      }); };
+      r.readAsArrayBuffer(f);
+    }
+  });
+}
+function handleImportRows(rows){
+  window.__impRows=[];
+  const head=rows[0].map(x=>String(x).trim());
+  const isHead=h=>head.some(x=>x.indexOf(h)>-1);
+  const okHead=isHead('站点名称')||isHead('线路ID');
+  let dataRows=rows;
+  if(okHead) dataRows=rows.slice(1);
+  const lines=[];
+  dataRows.forEach((row,i)=>{
+    const g=(idx)=>row[idx]===undefined?'':String(row[idx]).trim();
+    let rid=g(0), name=g(1), area=g(2), slots=g(3), eta=g(4), items=g(5), weightKg=g(6), estMin=g(7), lng=g(8), lat=g(9), note=g(10);
+    if(!okHead){ rid=g(1); name=g(2); }
+    const errs=[];
+    if(!name) errs.push('缺少站点名称');
+    const r=routeMatch(rid)||null;
+    if(rid&&!r) errs.push('线路不存在:'+rid);
+    if(!rid&&!r) r2=null; // 用弹窗所选
+    const rowNo=i+(okHead?2:1);
+    const item={rid:r?(r.id):'', name, area, slots:slots.split(/[|、,]/).filter(Boolean), eta, items:Number(items)||0, weightKg:Number(weightKg)||0, estMin:Number(estMin)||15, lng:parseFloat(lng)||0, lat:parseFloat(lat)||0, note, errs};
+    if(!errs.length) window.__impRows.push(item);
+    lines.push({item, rowNo, errs, ok:!errs.length});
+  });
+  const okN=window.__impRows.length;
+  const prev=$('#impPrev');
+  prev.innerHTML='<div class="imp-prev-h">解析到 '+(dataRows.length)+' 行，可导入 <b>'+okN+'</b> 条'+(lines.length-okN?'，跳过 '+ (lines.length-okN)+' 条':'' )+'</div>'
+    +'<div class="imp-table"><table><thead><tr><th>行</th><th>线路</th><th>站点名称</th><th>区域</th><th>标识</th><th>到站</th><th>结果</th></tr></thead><tbody>'
+    +lines.map(l=>'<tr class="'+(l.ok?'':'imp-bad')+'"><td>'+l.rowNo+'</td><td>'+(l.item.rid||'默认')+'</td><td>'+esc(l.item.name||'-')+'</td><td>'+esc(l.item.area||'-')+'</td><td>'+esc(l.item.slots.join(' '))+'</td><td>'+(l.item.eta||'-')+'</td><td>'+(l.ok?'<span class="imp-ok">✓ 可导入</span>':'<span class="imp-err">'+esc(l.errs.join('；'))+'</span>')+'</td></tr>').join('')
+    +'</tbody></table></div>'
+    +(okN?'<button class="vm-btn primary imp-go" id="impGo">确认导入 '+okN+' 条</button>':'');
+  const go=$('#impGo');
+  if(go) go.addEventListener('click',doRouteImport);
+}
+function doRouteImport(){
+  const selR=$('#impRoute').value;
+  let added=0;
+  (window.__impRows||[]).forEach(it=>{
+    const rid=it.rid||selR;
+    const r=ROUTES.find(x=>x.id===rid);
+    if(!r) return;
+    let maxN=0;
+    ROUTES.forEach(rt=>rt.stops.forEach(s=>{ const m=/^S(\d+)$/.exec(s.id); if(m) maxN=Math.max(maxN,parseInt(m[1],10)); }));
+    const nid='S'+(maxN+1);
+    const stop={id:nid, name:it.name, area:it.area||'观山湖区', eta:it.eta||'07:00', items:it.items, weightKg:it.weightKg, kind:it.slots.join(' · ')||'日配', slots:it.slots.length?it.slots:['整箱·日配'], estMin:it.estMin, note:it.note||'', main:null, backup:[], status:'pending', history:[{t:nowTag(), act:'批量导入创建'}], issues:[]};
+    r.stops.push(stop);
+    if(it.lat&&it.lng) COORDS[nid]=[it.lat,it.lng];
+    added++;
+  });
+  window.__impRows=null;
+  persist();
+  closeModal();
+  renderM();
+  toast('已导入 '+added+' 个停靠点（未导入站点可用「编辑」补坐标/责任人）');
+}
 /* ---- 弹窗 ---- */
 function openModal(title, bodyHtml){
   let m=$('#mModal');
@@ -2833,16 +3057,12 @@ function openPickMap(onPick, cur, opts){
    切换与初始化
    ============================================================ */
 const VERSIONS={
-  a:{name:'A · 调度舱', hint:'平台调度运营视角 · 深色控制台，全链路监控确认状态与异常外溢'},
-  b:{name:'B · 企业工作台', hint:'货主企业视角 · 浅色 SaaS，任务安排、责任人确认与结算一屏管理'},
-  c:{name:'C · 履约现场', hint:'一线责任人视角 · 高对比操作台，确认接单到扫码签收全流程'},
-  m:{name:'M · 运营管理', hint:'平台配置视角 · 车辆、线路、人员与站点增删改查，地图总览'}
+  a:{name:'A · 调度舱'}, b:{name:'B · 企业工作台'}, c:{name:'C · 履约现场'}, m:{name:'M · 运营管理'}
 };
 function switchVer(v){
   state.ver=v;
   document.querySelectorAll('.ver').forEach(m=>m.classList.toggle('is-active',m.dataset.ver===v));
   document.querySelectorAll('.switcher__tab').forEach(t=>t.classList.toggle('is-active',t.dataset.v===v));
-  $('#verHint').textContent=VERSIONS[v].hint;
   renderCurrent();
 }
 function renderCurrent(){
@@ -2871,7 +3091,7 @@ function initRegionMap(){
   const mk=()=>{
     if(typeof L==='undefined'){ box.innerHTML='<div class="vm-map-fail">地图组件加载失败，请稍后重试</div>'; return; }
     if(ivRMap){ ivRMap.invalidateSize(); return; }
-    ivRMap=L.map('ivRegionMap',{zoomControl:true}).setView(start,13);
+    ivRMap=L.map('ivRegionMap',{zoomControl:true, dragging:true, touchZoom:true, scrollWheelZoom:true, doubleClickZoom:true, tap:true}).setView(start,13);
     addTileLayer(ivRMap);
     const draw=(ll)=>{
       ivRCenter=[ll[0],ll[1]];
@@ -2886,8 +3106,16 @@ function initRegionMap(){
     ivRMap.on('mousedown',e=>{ clearT(); timer=setTimeout(()=>{ timer=null; draw([e.latlng.lat,e.latlng.lng]); toast('已落定中心点，可确认或继续调整'); },600); });
     ivRMap.on('mousemove',clearT); ivRMap.on('mouseup',clearT);
     ivRMap.on('dragstart',clearT); ivRMap.on('zoomstart',clearT);
-    ivRMap.on('touchstart',e=>{ clearT(); timer=setTimeout(()=>{ timer=null; const ll=ivRMap.mouseEventToLatLng(e.originalEvent); if(ll) draw([ll.lat,ll.lng]); },600); });
-    ivRMap.on('touchmove',clearT); ivRMap.on('touchend',clearT);
+    const dom=ivRMap.getContainer();
+    dom.addEventListener('touchstart',ev=>{
+      clearT();
+      const t=ev.touches[0]; if(!t) return;
+      const cx=t.clientX, cy=t.clientY;
+      timer=setTimeout(()=>{ timer=null; if(!ivRMap) return; const rect=dom.getBoundingClientRect(); const ll=ivRMap.containerPointToLatLng([cx-rect.left, cy-rect.top]); if(ll) draw([ll.lat,ll.lng]); },600);
+    },{passive:true});
+    dom.addEventListener('touchmove',clearT,{passive:true});
+    dom.addEventListener('touchend',clearT,{passive:true});
+    dom.addEventListener('touchcancel',clearT,{passive:true});
     if(ivRCenter) draw(ivRCenter);
     setTimeout(()=>{ ivRMap.invalidateSize(); },80);
   };
@@ -3047,7 +3275,18 @@ $('#btnDemo').addEventListener('click',()=>{
   enterRole('a'); state.role='demo';
   toast('演示模式 · 顶部可自由切换三版');
 });
+(function(){
+  function applyW(){ var w=document.documentElement.clientWidth; document.documentElement.setAttribute('data-w',w); var b=document.body; if(b){ b.classList.toggle('is-phone',w<520); b.classList.toggle('is-narrow',w<760); } }
+  applyW();
+  var _r=null;
+  window.addEventListener('resize',function(){ if(_r) clearTimeout(_r); _r=setTimeout(applyW,120); });
+})();
 $('#btnExit').addEventListener('click',()=>{ goLogin(); toast('已退出 · 请选择身份进入'); });
+$('#btnReset').addEventListener('click',()=>{
+  if(state.ver==='c'){ resetProgressDefault(); restoreDemoBinding(); state.cIssueOpen=false; renderC(); }
+  else { resetDemoData(); renderCurrent(); }
+  toast('已重置演示数据');
+});
 
 const drawer=document.createElement('div');
 drawer.className='vb-drawer';
