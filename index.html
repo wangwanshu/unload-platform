@@ -614,7 +614,8 @@ a{color:inherit;text-decoration:none}
 .inv-card{position:relative;max-width:430px}
 .inv-x{position:absolute;top:14px;right:16px;background:none;border:none;color:#8FA6C8;font-size:20px;line-height:1;cursor:pointer;z-index:2}
 .inv-x:hover{color:#E8F0FB}
-.iv-tip{font-size:12px;color:#9FB6DA;background:rgba(45,212,191,.08);border:1px solid rgba(45,212,191,.3);border-radius:10px;padding:10px 12px;line-height:1.7;margin:2px 0 14px}
+.iv-tip{font-size:12px;color:#9FB6DA;background:rgba(45,212,191,.08);border:1px solid rgba(45,212,191,.3);border-radius:10px;padding:10px 12px;line-height:1.7;margin:2px 0 10px}
+.iv-tag{display:inline-block;font-size:11px;color:#FFC98A;background:rgba(245,166,35,.1);border:1px solid rgba(245,166,35,.4);border-radius:999px;padding:4px 12px;margin-bottom:10px}
 .iv-form{display:flex;flex-direction:column;gap:10px;width:100%}
 .iv-row{display:flex;flex-direction:column;gap:5px}
 .iv-row label{font-size:12px;color:#8FA6C8}
@@ -901,7 +902,7 @@ a{color:inherit;text-decoration:none}
       </button>
     </div>
     <button class="login__demo" id="btnDemo">进入演示模式 · 三版自由切换</button>
-    <button class="login__invite" id="btnInviteLogin">骑手？扫码加入成为卸货员</button>
+    <button class="login__invite" id="btnInviteLogin">报名加入 · 成为卸货员</button>
   </div>
 </div>
 <div class="login" id="inviteScreen" style="display:none">
@@ -909,16 +910,16 @@ a{color:inherit;text-decoration:none}
     <button class="inv-x" id="invX">×</button>
     <div class="login__logo" id="ivLogo"></div>
     <div class="login__brand">
-      <h1>骑手加入 · 卸货员登记</h1>
-      <p>换电柜骑手转化 · 时段自由 · 按单结算</p>
+      <h1>加入 · 无人车卸货员</h1>
+      <p>时段自由 · 按单结算</p>
     </div>
-    <div class="iv-tip">利用跑单空闲时段，为无人车到站卸货兼职增收：单次卸货约 10-30 分钟，按单计酬，审核通过后短信通知上岗。</div>
+    <div class="iv-tag">平台内部邀约 · 信息提交后推送至运营管理后台</div>
+    <div class="iv-tip">用空闲时段为无人车到站卸货增收：单次卸货约 10-30 分钟，按单计酬，审核通过后短信通知上岗。欢迎换电柜骑手、门店员工、社会零工等各类人员加入。</div>
     <form class="iv-form" id="invForm">
       <div class="iv-row"><label>姓名 *</label><input id="ivName" placeholder="如 王磊"></div>
       <div class="iv-row"><label>手机号 *</label><input id="ivPhone" maxlength="11" placeholder="11 位手机号，用于结算与上岗通知"></div>
-      <div class="iv-row"><label>所属平台</label><select id="ivPlat"><option>美团</option><option>饿了么</option><option>达达</option><option>闪送</option><option>顺丰同城</option><option>其他</option></select></div>
+      <div class="iv-row"><label>人员来源</label><select id="ivPlat"><option>换电柜骑手</option><option>门店员工</option><option>社会零工</option><option>其他</option></select></div>
       <div class="iv-row"><label>常驻区域</label><select id="ivRegion"><option>观山湖区</option><option>云岩区</option><option>南明区</option><option>花溪区</option><option>白云区</option><option>乌当区</option><option>清镇市</option><option>开阳县</option><option>息烽县</option><option>修文县</option></select></div>
-      <div class="iv-row"><label>换电柜网点</label><input id="ivGrid" placeholder="如 观山湖万达换电柜（选填）"></div>
       <div class="iv-row"><label>可作业时段 *</label><div class="iv-chips">
         <label class="iv-chip"><input type="checkbox" name="shift" value="06-10 早高峰"><span>06-10 早高峰</span></label>
         <label class="iv-chip"><input type="checkbox" name="shift" value="10-14"><span>10-14</span></label>
@@ -938,8 +939,8 @@ a{color:inherit;text-decoration:none}
     <div class="iv-ok" id="invOk" style="display:none">
       <div class="iv-okic">✓</div>
       <b>登记已提交</b>
-      <p>运营审核通过后将以短信通知您上岗；首次上岗需完成卸货 SOP 培训（约 20 分钟）。</p>
-      <button class="login__demo" id="ivBack">返回</button>
+      <p>您的信息已推送至平台<b>运营管理后台</b>，运营审核通过后将以短信通知上岗；首次上岗需完成卸货 SOP 培训（约 20 分钟）。</p>
+      <button class="login__demo" id="ivBack">完成</button>
     </div>
   </div>
 </div>
@@ -1072,13 +1073,29 @@ let STAFF = [
 /* ---- 换电柜骑手邀约：转化通道（扫码登记 → 待审核 → 通过后纳入人员池）---- */
 let INVITE_STAT = {views:32, scan:21, submit:16, pass:11};
 let INVITES = [
-  {id:'I01', name:'王磊', phone:'139****2214', platform:'美团', grid:'观山湖万达换电柜', region:'观山湖区', shift:'06-10 早高峰 · 18-22 晚高峰', skills:['电动车快运','生鲜冷链'], time:'今天 09:12', state:'待审核'},
-  {id:'I02', name:'张斌', phone:'151****8867', platform:'饿了么', grid:'会展城换电柜', region:'观山湖区', shift:'10-14 · 18-22', skills:['电动车快运'], time:'今天 10:47', state:'待审核'},
-  {id:'I03', name:'刘洋', phone:'186****3352', platform:'达达', grid:'金阳医院换电柜', region:'云岩区', shift:'全天', skills:['电动车快运','重货协同'], time:'昨天 20:15', state:'待审核'}
+  {id:'I01', name:'王磊', phone:'139****2214', platform:'换电柜骑手', grid:'观山湖万达换电柜', region:'观山湖区', shift:'06-10 早高峰 · 18-22 晚高峰', skills:['电动车快运','生鲜冷链'], time:'今天 09:12', state:'待审核'},
+  {id:'I02', name:'张斌', phone:'151****8867', platform:'门店员工', grid:'会展城店', region:'观山湖区', shift:'10-14 · 18-22', skills:['电动车快运'], time:'今天 10:47', state:'待审核'},
+  {id:'I03', name:'刘洋', phone:'186****3352', platform:'社会零工', grid:'', region:'云岩区', shift:'全天', skills:['电动车快运','重货协同'], time:'昨天 20:15', state:'待审核'}
 ];
 const DEMO_INVITES = JSON.parse(JSON.stringify(INVITES));
 function loadInviteApps(){ try{ return JSON.parse(localStorage.getItem('unload_invite_apps'))||[]; }catch(e){ return []; } }
 function saveInviteApps(list){ try{ localStorage.setItem('unload_invite_apps', JSON.stringify(list)); }catch(e){} }
+/* ---- Supabase 云端同步（骑手手机提交 -> 运营后台实时读取）----
+   key 为 Publishable key（可公开，浏览器端专用；权限由 RLS 策略控制，生产请收紧） */
+const SUPA_URL='https://bwlzvnpvaptmsmwkbxjs.supabase.co';
+const SUPA_KEY='sb_publishable_zFClW1QN8-RVzXEw-JUU0A_TrWZPuTC';
+const SUPA_ON=!!(SUPA_URL&&SUPA_KEY);
+let REMOTE_INVITES=[];
+function supaHeaders(){
+  return {'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY,'Content-Type':'application/json'};
+}
+function refreshRemoteInvites(){
+  if(!SUPA_ON) return;
+  const q=SUPA_URL+'/rest/v1/invites?select=id,invite_code,name,phone,platform,grid,region,shift,skills,pay,state,created_at&state=eq.'+encodeURIComponent('待审核')+'&order=created_at.desc';
+  fetch(q,{headers:supaHeaders()})
+    .then(r=>r.json()).then(list=>{ if(Array.isArray(list)){ REMOTE_INVITES=list; if(state.ver==='m'&&state.mNav==='staff') renderM(); } }).catch(()=>{});
+}
+function maskPhone(p){ if(!p) return ''; return String(p).replace(/(\d{3})\d{4}(\d{4})/,'$1****$2'); }
 
 const state = {
   ver:'a', route:'R1', selStop:'S1',
@@ -1089,7 +1106,7 @@ const state = {
 let seq = 100;
 
 /* 版本号：每轮迭代更新此常量，顶栏徽标与登录页自动同步 */
-const APP_VERSION = 'V10';
+const APP_VERSION = 'V13';
 /* 当日班次即时确认限时（分钟），超时自动升级备选 / 外溢 */
 const URGENT_CONFIRM_MIN = 30;
 
@@ -2140,22 +2157,25 @@ function mRouteHtml(){
 }
 function mStaffHtml(){
   const apps=loadInviteApps();
-  const pending=INVITES.concat(apps.filter(a=>a.state==='待审核').map(a=>({id:a.id, name:a.name, phone:a.phone, platform:a.platform, grid:a.grid||'', region:a.region||'', shift:a.shift||'', skills:a.skills||[], time:a.time, state:'待审核', _app:true})));
+  const remoteOk=REMOTE_INVITES.filter(x=>x.state==='待审核');
+  const localApps=apps.filter(a=>a.state==='待审核').filter(a=>!remoteOk.some(x=>x.name===a.name&&x.phone===a.phone));
+  const pending=INVITES.concat(localApps.map(a=>({id:a.id, name:a.name, phone:a.phone, platform:a.platform, grid:a.grid||'', region:a.region||'', shift:a.shift||'', skills:a.skills||[], time:a.time, state:'待审核', _app:true})))
+    .concat(remoteOk.map(x=>({id:'R'+x.id, _remote:true, remoteId:x.id, name:x.name, phone:x.phone, platform:x.platform, grid:x.grid||'', region:x.region||'', shift:x.shift||'', skills:(x.skills||'').split('、').filter(Boolean), time:(x.created_at||'').replace('T',' ').slice(5,16), state:'待审核'})));
   const selfCnt=STAFF.filter(p=>p.source!=='骑手转化').length;
-  const swapCnt=STAFF.filter(p=>p.source==='骑手转化').length;
+  const swapCnt=STAFF.filter(p=>p.source==='骑手转化'||p.source==='邀约招募').length;
   const f=state.mStaffFilter||'all';
   const rows=STAFF.map(p=>{
     if(f==='self'&&p.source!=='自有员工') return '';
     if(f==='swap'&&p.source!=='骑手转化') return '';
-    const tag=p.source==='骑手转化'?'<span class="src-tag swap">'+ICONS.hand+' 骑手转化</span>':'<span class="src-tag">自有员工</span>';
+    const tag=p.source==='骑手转化'?'<span class="src-tag swap">'+ICONS.hand+' 骑手转化</span>':(p.source==='邀约招募'?'<span class="src-tag">'+ICONS.user+' 邀约招募</span>':'<span class="src-tag">自有员工</span>');
     return '<tr><td><b>'+esc(p.name)+'</b><div class="t-muted">'+p.id+(p.phone?(' · '+esc(p.phone)):'')+'</div>'+tag+'</td><td>'+esc(p.role)+'</td><td>'+esc(p.station)+'</td>'
       +'<td>'+p.score.toFixed(1)+'</td><td>'+p.ok+'%</td><td>'+esc(p.state)+(p.state==='待培训'?'<div class="t-muted">需完成卸货 SOP 培训</div>':'')+'</td>'
       +'<td><div class="vm-ops"><button class="vm-btn" data-mact="editStaff" data-id="'+p.id+'">编辑</button><button class="vm-btn danger" data-mact="delStaff" data-id="'+p.id+'">删除</button></div></td></tr>';
   }).filter(Boolean).join('');
   const pendRows=pending.map(a=>{
-    return '<div class="inv-pend"><div class="ip-top"><b>'+esc(a.name)+'</b><span class="t-muted">'+esc(a.phone)+'</span>'
-      +'<span class="ip-grid">'+ICONS.bolt+' '+esc(a.grid||a.region||'')+'</span><span class="ip-time">'+esc(a.time)+'</span></div>'
-      +'<div class="ip-mid">'+(a.platform?esc(a.platform)+' · ':'')+'常驻 '+esc(a.region||'')+(a.shift?' · 时段 '+esc(a.shift):'')+'</div>'
+    return '<div class="inv-pend"><div class="ip-top"><b>'+esc(a.name)+'</b><span class="t-muted">'+esc(maskPhone(a.phone))+'</span>'
+      +'<span class="ip-grid">'+ICONS.bolt+' '+esc(a.platform||a.grid||a.region||'')+'</span><span class="ip-time">'+esc(a.time)+'</span></div>'
+      +'<div class="ip-mid">常驻 '+esc(a.region||'')+(a.shift?' · 时段 '+esc(a.shift):'')+(a.grid?' · '+esc(a.grid):'')+'</div>'
       +'<div class="ip-skills">'+(a.skills||[]).map(s=>'<i>'+esc(s)+'</i>').join('')+'</div>'
       +'<div class="ip-ops"><button class="vm-btn primary" data-mact="approveInvite" data-id="'+a.id+'">'+ICONS.check+' 通过并纳入人员池</button><button class="vm-btn danger" data-mact="rejectInvite" data-id="'+a.id+'">拒绝</button></div></div>';
   }).join('');
@@ -2311,6 +2331,7 @@ function bindM(){
     else if(act==='locate') locateMe();
   }));
   if(state.mNav==='map') initMap();
+  if(state.mNav==='staff'&&SUPA_ON) setTimeout(refreshRemoteInvites,120);
 }
 
 /* ---- 弹窗 ---- */
@@ -2440,14 +2461,14 @@ function openInviteModal(){
   const localLink=(isLocal?location.href.split('?')[0]:publicLink)+'?invite='+code;
   const link=isLocal?publicLink:localLink;
   const qr='https://api.qrserver.com/v1/create-qr-code/?size=220x220&data='+encodeURIComponent(link);
-  const words='【无人车卸货员 · 邀约】我是换电柜合作骑手，现加入无人车卸货履约平台：扫码登记，按单结算、时段自由、单次卸货约 10-30 分钟。登记链接：'+link;
+  const words='【无人车卸货员 · 邀约】现加入无人车卸货履约平台成为卸货员：扫码登记，按单结算、时段自由、单次卸货约 10-30 分钟。登记链接：'+link;
   openModal('发起骑手邀约 · '+code,
     '<div class="inv-mdl">'
     +'<div class="inv-qr"><img id="invQrImg" src="'+qr+'" alt="邀请二维码"><div class="t-muted">手机扫码 → 填表登记（扫码地址见下方公网链接）</div></div>'
     +'<div class="inv-link"><input id="invLink" readonly value="'+esc(link)+'"><button type="button" class="vm-btn" id="invCopyLink">复制链接</button></div>'
     +(isLocal?'<div class="inv-link local"><input id="invLinkLocal" readonly value="'+esc(localLink)+'"><button type="button" class="vm-btn" id="invCopyLocal">复制本机预览链接</button></div>':'')
     +'<div class="inv-words"><textarea id="invWords" readonly rows="3">'+esc(words)+'</textarea><button type="button" class="vm-btn" id="invCopyWords">复制话术</button></div>'
-    +'<div class="vm-hint">'+ICONS.gear+(isLocal?' 当前为本机预览：二维码已指向<b>公网地址</b>。请先把最新版上传到 GitHub，再用手机扫码（本机预览链接仅当前电脑可打开）。':'')+' 骑手提交后进入「待审核」；通过即纳入人员池（标记：骑手转化，初始状态「待培训」，需完成卸货 SOP 培训后正式上岗），可绑定停靠点主责/备选。生成一次邀约计一次曝光。</div>'
+    +'<div class="vm-hint">'+ICONS.gear+(isLocal?' 当前为本机预览：二维码已指向<b>公网地址</b>。请先把最新版上传到 GitHub，再用手机扫码（本机预览链接仅当前电脑可打开）。':'')+' 报名提交后进入「待审核」；通过即纳入人员池（按来源标记，初始状态「待培训」，需完成卸货 SOP 培训后正式上岗），可绑定停靠点主责/备选。生成一次邀约计一次曝光。</div>'
     +'</div>');
   const qimg=$('#invQrImg');
   if(qimg){ qimg.onerror=()=>{ qimg.style.display='none'; const box=qimg.closest('.inv-qr'); if(box) box.insertAdjacentHTML('beforeend','<div class="pk-empty">二维码服务暂不可用，请直接复制链接/话术发送给骑手</div>'); }; }
@@ -2461,15 +2482,30 @@ function approveInvite(id){
   const apps=loadInviteApps();
   let a=INVITES.find(x=>x.id===id);
   if(!a) a=apps.find(x=>x.id===id&&x.state==='待审核');
+  if(a&&a._remote){
+    if(SUPA_ON){ fetch(SUPA_URL+'/rest/v1/invites?id=eq.'+a.remoteId, {method:'PATCH', headers:supaHeaders(), body:JSON.stringify({state:'已通过'})}).catch(()=>{}); }
+    REMOTE_INVITES=REMOTE_INVITES.filter(x=>x.id!==a.remoteId);
+    INVITE_STAT.pass++;
+    renderM(); toast('已通过：'+a.name+'（云端已同步）');
+    return;
+  }
   if(!a){ toast('未找到该申请'); return; }
   INVITES=INVITES.filter(x=>x.id!==id);
   if(a._app) saveInviteApps(apps.filter(x=>x.id!==id));
-  STAFF.push({id:'P'+String(STAFF.length+1).padStart(2,'0'), name:a.name, phone:a.phone, role:'兼职·骑手', station:'片区驻点池', score:4.0, ok:90, state:'待培训', source:'骑手转化', grid:a.grid||'', region:a.region||'', skills:a.skills||[]});
+  STAFF.push({id:'P'+String(STAFF.length+1).padStart(2,'0'), name:a.name, phone:a.phone, role:'兼职·骑手', station:'片区驻点池', score:4.0, ok:90, state:'待培训', source:(a.platform==='换电柜骑手'?'骑手转化':'邀约招募'), grid:a.grid||'', region:a.region||'', skills:a.skills||[]});
   INVITE_STAT.pass++;
   closeModal(); renderM(); toast('已通过：'+a.name+' 纳入人员池（待培训）');
 }
 function rejectInvite(id){
   const apps=loadInviteApps();
+  let a=INVITES.find(x=>x.id===id);
+  if(!a) a=apps.find(x=>x.id===id&&x.state==='待审核');
+  if(a&&a._remote){
+    if(SUPA_ON){ fetch(SUPA_URL+'/rest/v1/invites?id=eq.'+a.remoteId, {method:'PATCH', headers:supaHeaders(), body:JSON.stringify({state:'已拒绝'})}).catch(()=>{}); }
+    REMOTE_INVITES=REMOTE_INVITES.filter(x=>x.id!==a.remoteId);
+    renderM(); toast('已拒绝该申请（云端已同步）');
+    return;
+  }
   INVITES=INVITES.filter(x=>x.id!==id);
   if(apps.some(x=>x.id===id)) saveInviteApps(apps.filter(x=>x.id!==id));
   renderM(); toast('已拒绝该申请');
@@ -2777,13 +2813,19 @@ function submitInvite(){
   const shifts=[].slice.call(document.querySelectorAll('#invForm input[name=shift]:checked')).map(i=>i.value);
   if(!shifts.length){ toast('请至少选择 1 个可作业时段'); return; }
   const skills=[].slice.call(document.querySelectorAll('#invForm input[name=skill]:checked')).map(i=>i.value);
+  const p=new URLSearchParams(location.search).get('invite')||'';
+  const rec={invite_code:p, name:name, phone:phone, platform:$('#ivPlat').value, grid:'', region:$('#ivRegion').value, shift:shifts.join(' · '), skills:skills.join('、'), pay:$('#ivPay').value, state:'待审核'};
   const apps=loadInviteApps();
-  apps.unshift({id:'I'+Date.now().toString().slice(-6), name:name, phone:phone.replace(/(\d{3})\d{4}(\d{4})/,'$1****$2'), platform:$('#ivPlat').value, grid:$('#ivGrid').value.trim()||$('#ivPlat').value+'合作网点', region:$('#ivRegion').value, shift:shifts.join(' · '), skills:skills, pay:$('#ivPay').value, time:nowTag(), state:'待审核', _app:true});
+  apps.unshift({id:'I'+Date.now().toString().slice(-6), invite_code:p, name:name, phone:phone, platform:rec.platform, grid:rec.grid, region:rec.region, shift:rec.shift, skills:skills, pay:rec.pay, time:nowTag(), state:'待审核', _app:true});
   saveInviteApps(apps);
   INVITE_STAT.submit++;
+  if(SUPA_ON){
+    fetch(SUPA_URL+'/rest/v1/invites', {method:'POST', headers:supaHeaders(), body:JSON.stringify(rec)})
+      .then(r=>{ if(!r.ok){ toast('云端提交失败('+r.status+')：已存本机，请检查建表 SQL 是否已执行'); } else { toast('已推送至运营管理后台'); } })
+      .catch(()=>{ toast('网络异常：已存本机，稍后自动重试'); });
+  } else { toast('未配置云端，已存本机（演示）'); }
   $('#invForm').style.display='none';
   $('#invOk').style.display='block';
-  toast('登记已提交，等待运营审核');
 }
 /* ---------- 登录 / 角色进入 ---------- */
 function enterRole(v){
@@ -2818,7 +2860,10 @@ $('#ivBack').addEventListener('click',()=>{ $('#inviteScreen').style.display='no
 $('#invForm').addEventListener('submit',e=>{ e.preventDefault(); submitInvite(); });
 (function(){
   const p=new URLSearchParams(location.search).get('invite');
-  if(p){ INVITE_STAT.scan++; showInviteScreen(); toast('扫码成功：欢迎登记成为卸货员'); }
+  if(p){
+    document.title='卸货员报名登记 · 无人车卸货平台';
+    INVITE_STAT.scan++; showInviteScreen(); toast('扫码成功：欢迎登记成为卸货员');
+  }
 })();
 document.querySelectorAll('.login__role').forEach(b=>b.addEventListener('click',()=>{
   const r=b.dataset.role;
